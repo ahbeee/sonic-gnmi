@@ -1,0 +1,119 @@
+module sonic-port-qos-map {
+    namespace "http://github.com/Azure/sonic-port-qos-map";
+    prefix pqm;
+    yang-version 1.1;
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    import sonic-port {
+        prefix prt;
+    }
+
+    import sonic-tc-queue-map {
+        prefix tqm;
+    }
+
+    import sonic-dscp-tc-map {
+        prefix dtm;
+    }
+
+    import sonic-dot1p-tc-map {
+        prefix dot1ptm;
+    }
+
+    import sonic-scheduler {
+        prefix sch;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC PORT_QOS_MAP";
+
+    revision 2019-05-15 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-port-qos-map {
+
+        container PORT_QOS_MAP {
+
+            list PORT_QOS_MAP_LIST {
+                key "ifname";
+                sonic-ext:key-pattern "PORT_QOS_MAP|({ifname},)*"; //special pattern used for extracting keys from redis-key and fill populate the yang instance
+                                           // Total list instance = number(key1) * number(key2) * number(key3)
+
+                leaf ifname {
+                    type union {
+                        type string {
+                            pattern "CPU";
+                        }
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                    }
+                }
+
+                leaf tc_to_queue_map {
+                    type string;
+                    sonic-ext:custom-validation ValidateTctoQueueMap;
+                }
+
+                leaf dscp_to_tc_map {
+                    type string;
+                    sonic-ext:custom-validation ValidateDscptoTcMap;
+                }
+
+                leaf dot1p_to_tc_map {
+                    type string;
+                    sonic-ext:custom-validation ValidateDot1ptoTcMap;
+                }
+
+                leaf tc_to_pg_map {
+                    type string;
+                    sonic-ext:custom-validation ValidateTctoPgMap;
+                }
+
+                leaf pfc_enable {
+                    type string;
+                    sonic-ext:custom-validation ValidateIfPfcWd;
+                }
+
+                leaf pfc_to_queue_map {
+                    type string;
+                    sonic-ext:custom-validation ValidatePfctoQueueMap;
+                }
+
+                leaf tc_to_dot1p_map {
+                    type string;
+                    sonic-ext:custom-validation ValidateTctoDot1pMap;
+                }
+
+                leaf tc_to_dscp_map {
+                    type string;
+                    sonic-ext:custom-validation ValidateTctoDscpMap;
+                }
+
+                leaf scheduler {
+                    type leafref {
+                        path "/sch:sonic-scheduler/sch:SCHEDULER/sch:SCHEDULER_LIST/sch:name"; //Reference to SCHEDULER table
+                    }
+                }
+
+                leaf ing_scheduler {
+                    type leafref {
+                        path "/sch:sonic-scheduler/sch:SCHEDULER/sch:SCHEDULER_LIST/sch:name"; //Reference to SCHEDULER table
+                    }
+                }
+
+            }
+        }
+    }
+}

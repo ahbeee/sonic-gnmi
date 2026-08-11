@@ -1,0 +1,40 @@
+module sonic-watermark {
+    namespace "http://github.com/Azure/sonic-watermark";
+    prefix swatermark;
+    yang-version 1.1;
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC WATERMARK";
+
+    revision 2025-07-21 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-watermark {
+        container WATERMARK_TABLE {
+
+            list WATERMARK_TABLE_LIST {
+                key "table_name";
+
+                leaf table_name {
+                    type string {
+                        pattern "TELEMETRY_INTERVAL";
+                    }
+                    description "Table name for watermark configuration";
+                }
+
+                leaf interval {
+                    type uint32;
+                    description "Telemetry interval in seconds";
+                }
+            }
+        }
+    }
+}

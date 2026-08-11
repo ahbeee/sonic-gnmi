@@ -1,0 +1,662 @@
+module sonic-counters {
+    yang-version 1.1;
+    namespace "http://github.com/Azure/sonic-counters";
+    prefix sc;
+
+    organization "SONiC";
+    contact "SONiC";
+    description "SONiC COUNTERS YANG model";
+
+    revision 2024-11-14 {
+        description "Initial revision with full COUNTERS container.";
+    }
+
+    container sonic-counters {
+        container COUNTERS {
+            list COUNTERS_LIST {
+                key "name";
+
+                leaf name {
+                    type string;
+                }
+
+                // Ingress Priority Group Statistics, refer to sai/brcm-sai-odp/include/sai/saibuffer.h
+                leaf SAI_INGRESS_PRIORITY_GROUP_STAT_PACKETS{
+                    type uint64;
+                }
+                leaf SAI_INGRESS_PRIORITY_GROUP_STAT_BYTES{
+                    type uint64;
+                }
+                leaf SAI_INGRESS_PRIORITY_GROUP_STAT_CURR_OCCUPANCY_BYTES{
+                    type uint64;
+                }
+                leaf SAI_INGRESS_PRIORITY_GROUP_STAT_WATERMARK_BYTES{
+                    type uint64;
+                }
+                leaf SAI_INGRESS_PRIORITY_GROUP_STAT_SHARED_CURR_OCCUPANCY_BYTES{
+                    type uint64;
+                }
+                leaf SAI_INGRESS_PRIORITY_GROUP_STAT_SHARED_WATERMARK_BYTES{
+                    type uint64;
+                }
+                leaf SAI_INGRESS_PRIORITY_GROUP_STAT_XOFF_ROOM_CURR_OCCUPANCY_BYTES{
+                    type uint64;
+                }
+                leaf SAI_INGRESS_PRIORITY_GROUP_STAT_XOFF_ROOM_WATERMARK_BYTES{
+                    type uint64;
+                }
+                leaf SAI_INGRESS_PRIORITY_GROUP_STAT_DROPPED_PACKETS{
+                    type uint64;
+                }
+
+                // Queue Statistics, refer to sai/brcm-sai-odp/include/sai/saiqueue.h
+                leaf SAI_QUEUE_STAT_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_DROPPED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_DROPPED_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_GREEN_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_GREEN_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_GREEN_DROPPED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_GREEN_DROPPED_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_YELLOW_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_YELLOW_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_YELLOW_DROPPED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_YELLOW_DROPPED_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_RED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_RED_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_RED_DROPPED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_RED_DROPPED_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_GREEN_WRED_DROPPED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_GREEN_WRED_DROPPED_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_YELLOW_WRED_DROPPED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_YELLOW_WRED_DROPPED_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_RED_WRED_DROPPED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_RED_WRED_DROPPED_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_WRED_DROPPED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_WRED_DROPPED_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_CURR_OCCUPANCY_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_WATERMARK_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_SHARED_CURR_OCCUPANCY_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_SHARED_WATERMARK_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_GREEN_WRED_ECN_MARKED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_GREEN_WRED_ECN_MARKED_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_YELLOW_WRED_ECN_MARKED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_YELLOW_WRED_ECN_MARKED_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_RED_WRED_ECN_MARKED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_RED_WRED_ECN_MARKED_BYTES {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_WRED_ECN_MARKED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_QUEUE_STAT_WRED_ECN_MARKED_BYTES {
+                    type uint64;
+                }
+
+
+                // Port Statistics, refer to sai/brcm-sai-odp/include/sai/saiport.h
+                leaf SAI_PORT_STAT_IF_IN_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IF_IN_UCAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IF_IN_NON_UCAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IF_IN_DISCARDS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IF_IN_ERRORS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IF_IN_UNKNOWN_PROTOS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IF_IN_BROADCAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IF_IN_MULTICAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IF_IN_VLAN_DISCARDS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IF_OUT_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IF_OUT_UCAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IF_OUT_NON_UCAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IF_OUT_DISCARDS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IF_OUT_ERRORS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IF_OUT_QLEN {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IF_OUT_BROADCAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IF_OUT_MULTICAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_DROP_EVENTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_MULTICAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_BROADCAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_UNDERSIZE_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_FRAGMENTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_PKTS_64_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_PKTS_65_TO_127_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_PKTS_128_TO_255_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_PKTS_256_TO_511_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_PKTS_512_TO_1023_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_PKTS_1024_TO_1518_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_PKTS_1519_TO_2047_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_PKTS_2048_TO_4095_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_PKTS_4096_TO_9216_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_PKTS_9217_TO_16383_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_OVERSIZE_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_RX_OVERSIZE_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_TX_OVERSIZE_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_JABBERS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_COLLISIONS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_CRC_ALIGN_ERRORS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_TX_NO_ERRORS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_STATS_RX_NO_ERRORS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IP_IN_RECEIVES {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IP_IN_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IP_IN_UCAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IP_IN_NON_UCAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IP_IN_DISCARDS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IP_OUT_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IP_OUT_UCAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IP_OUT_NON_UCAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IP_OUT_DISCARDS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IPV6_IN_RECEIVES {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IPV6_IN_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IPV6_IN_UCAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IPV6_IN_NON_UCAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IPV6_IN_MCAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IPV6_IN_DISCARDS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IPV6_OUT_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IPV6_OUT_UCAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IPV6_OUT_NON_UCAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IPV6_OUT_MCAST_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IPV6_OUT_DISCARDS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_GREEN_WRED_DROPPED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_GREEN_WRED_DROPPED_BYTES {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_YELLOW_WRED_DROPPED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_YELLOW_WRED_DROPPED_BYTES {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_RED_WRED_DROPPED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_RED_WRED_DROPPED_BYTES {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_WRED_DROPPED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_WRED_DROPPED_BYTES {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ECN_MARKED_PACKETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_IN_PKTS_64_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_IN_PKTS_65_TO_127_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_IN_PKTS_128_TO_255_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_IN_PKTS_256_TO_511_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_IN_PKTS_512_TO_1023_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_IN_PKTS_1024_TO_1518_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_IN_PKTS_1519_TO_2047_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_IN_PKTS_2048_TO_4095_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_IN_PKTS_4096_TO_9216_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_IN_PKTS_9217_TO_16383_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_OUT_PKTS_64_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_OUT_PKTS_65_TO_127_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_OUT_PKTS_128_TO_255_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_OUT_PKTS_256_TO_511_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_OUT_PKTS_512_TO_1023_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_OUT_PKTS_1024_TO_1518_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_OUT_PKTS_1519_TO_2047_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_OUT_PKTS_2048_TO_4095_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_OUT_PKTS_4096_TO_9216_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_ETHER_OUT_PKTS_9217_TO_16383_OCTETS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IN_CURR_OCCUPANCY_BYTES {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IN_WATERMARK_BYTES {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IN_SHARED_CURR_OCCUPANCY_BYTES {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IN_SHARED_WATERMARK_BYTES {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_OUT_CURR_OCCUPANCY_BYTES {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_OUT_WATERMARK_BYTES {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_OUT_SHARED_CURR_OCCUPANCY_BYTES {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_OUT_SHARED_WATERMARK_BYTES {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IN_DROPPED_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_OUT_DROPPED_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PAUSE_RX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PAUSE_TX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_0_RX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_0_TX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_1_RX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_1_TX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_2_RX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_2_TX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_3_RX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_3_TX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_4_RX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_4_TX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_5_RX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_5_TX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_6_RX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_6_TX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_7_RX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_7_TX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_0_RX_PAUSE_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_0_TX_PAUSE_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_1_RX_PAUSE_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_1_TX_PAUSE_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_2_RX_PAUSE_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_2_TX_PAUSE_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_3_RX_PAUSE_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_3_TX_PAUSE_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_4_RX_PAUSE_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_4_TX_PAUSE_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_5_RX_PAUSE_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_5_TX_PAUSE_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_6_RX_PAUSE_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_6_TX_PAUSE_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_7_RX_PAUSE_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_7_TX_PAUSE_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_0_ON2OFF_RX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_1_ON2OFF_RX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_2_ON2OFF_RX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_3_ON2OFF_RX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_4_ON2OFF_RX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_5_ON2OFF_RX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_6_ON2OFF_RX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_PFC_7_ON2OFF_RX_PKTS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_DOT3_STATS_ALIGNMENT_ERRORS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_DOT3_STATS_FCS_ERRORS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_DOT3_STATS_SINGLE_COLLISION_FRAMES {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_DOT3_STATS_MULTIPLE_COLLISION_FRAMES {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_DOT3_STATS_SQE_TEST_ERRORS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_DOT3_STATS_DEFERRED_TRANSMISSIONS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_DOT3_STATS_LATE_COLLISIONS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_DOT3_STATS_EXCESSIVE_COLLISIONS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_DOT3_STATS_INTERNAL_MAC_TRANSMIT_ERRORS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_DOT3_STATS_CARRIER_SENSE_ERRORS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_DOT3_STATS_FRAME_TOO_LONGS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_DOT3_STATS_INTERNAL_MAC_RECEIVE_ERRORS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_DOT3_STATS_SYMBOL_ERRORS {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_DOT3_CONTROL_IN_UNKNOWN_OPCODES {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_EEE_TX_EVENT_COUNT {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_EEE_RX_EVENT_COUNT {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_EEE_TX_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_EEE_RX_DURATION {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IN_DROP_REASON_RANGE_BASE {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_IN_DROP_REASON_RANGE_END {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_OUT_DROP_REASON_RANGE_BASE {
+                    type uint64;
+                }
+                leaf SAI_PORT_STAT_OUT_DROP_REASON_RANGE_END {
+                    type uint64;
+                }
+            }
+        }
+    }
+}

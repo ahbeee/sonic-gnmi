@@ -1,0 +1,116 @@
+module sonic-ldap {
+    namespace "http://github.com/Azure/sonic-ldap";
+    prefix sldap;
+    yang-version 1.1;
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import sonic-port {
+        prefix port;
+    }
+
+    import sonic-portchannel {
+        prefix lag;
+    }
+
+    /*
+    import sonic-vlan {
+        prefix vlan;
+    }
+    */
+
+    import sonic-loopback-interface {
+        prefix sonic-lo-if;
+    }
+
+    revision 2021-04-15 {
+        description "Initial revision.";
+    }
+
+    container sonic-ldap {
+
+        container LDAP_SERVER {
+            list LDAP_SERVER_LIST {
+                key "ipaddress";
+
+                leaf ipaddress {
+                    type inet:ip-address;
+                    description
+                        "LDAP server's IPv4 address";
+                }
+
+                leaf priority {
+                    type uint8 {
+                        range "1..8" {
+                            error-message "LDAP server priority must be 1..8";
+                        }
+                    }
+                    description "Server priority";
+                }
+            }
+        }
+
+        container LDAP {
+            list LDAP_LIST {
+                key "name";
+
+                leaf name {
+                    type string {
+                        pattern "global" {
+                            error-message "Error: Invalid LDAP name";
+                        }
+                    }
+                    description "LDAP global configuration";
+                }
+
+                leaf timeout {
+                    type uint16 {
+                        range "1..60" {
+                            error-message "LDAP timeout must be 1..60";
+                        }
+                    }
+                }
+
+                leaf bind_timeout {
+                    type uint16 {
+                        range "1..120" {
+                            error-message "LDAP bind timeout must be 1..120";
+                        }
+                    }
+                }
+
+                leaf bind_password {
+                    type string {
+                        length "1..200";
+                        pattern "[^ #,]*";
+                    }
+                }
+
+                leaf base_dn {
+                    type string {
+                        pattern '([a-zA-Z0-9]+=[a-zA-Z0-9#@?.-]+)([,|+][a-zA-Z0-9]+=[a-zA-Z0-9#@?.-]+)*' {
+                            error-message 'Invalid DN value';
+                        }
+                    }
+                    description "LDAP DN";
+                }
+
+                leaf bind_dn {
+                    type string {
+                        pattern '([a-zA-Z0-9]+=[a-zA-Z0-9#@?.-]+)([,|+][a-zA-Z0-9]+=[a-zA-Z0-9#@?.-]+)*' {
+                            error-message 'Invalid DN value';
+                        }
+                    }
+                    description "LDAP DN";
+                }
+
+                leaf port {
+                    type inet:port-number;
+                    description "TCP port to communite with LDAP server";
+                }
+            }
+        }
+    }
+}

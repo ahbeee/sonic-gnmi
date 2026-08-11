@@ -1,0 +1,149 @@
+module sonic-pbr {
+	namespace "http://github.com/Azure/sonic-pbr";
+	prefix spbr;
+	yang-version 1.1;
+
+	import ietf-inet-types {
+		prefix inet;
+	}
+
+	import sonic-port {
+		prefix prt;
+	}
+
+	import sonic-vlan {
+		prefix svlan;
+	}
+
+	import sonic-portchannel {
+		prefix spc;
+	}
+
+	import sonic-extension {
+		prefix sonic-ext;
+	}
+
+
+	description
+		"SONIC PBR";
+
+	revision 2025-10-13 {
+		description
+			"Initial revision.";
+	}
+
+	container sonic-pbr {
+
+
+		container PBR_MAP_TABLE {
+
+			list PBR_MAP_TABLE_LIST {
+				key "mapname sequence_num";
+				sonic-ext:custom-validation ValidatePBRMAPAttr;
+
+				leaf mapname{
+					type string;
+				}
+
+				leaf sequence_num {
+					//type uint32;
+					type string;
+				}
+
+				leaf type {
+					type string {
+						pattern "(permit|deny)";
+					}
+				}
+
+				leaf action_set_nexthop {
+					must "current()/../type = 'permit'" {
+						error-message "action option only supported for pbr rule with type 'permit'";
+					}
+					type union {
+						type inet:ip-address;
+						type inet:ip-prefix;
+						type string{
+							pattern '^(([0-9]{1,3}\.){3}[0-9]{1,3}|[0-9a-fA-F:]+)(/\d{1,3})?@Vrf([a-zA-Z0-9\-_]+)';
+						}
+					}
+				}
+
+				leaf action_set_dscp {
+					must "current()/../type = 'permit'" {
+						error-message "action option only supported for pbr rule with type 'permit'";
+					}
+					type uint8{
+						range "0..63";
+					}
+				}
+
+				leaf ip_proto {
+					type uint8{
+						range "0..255";
+					}
+				}
+
+				leaf match_sport {
+					type uint32{
+						range "0..65535";
+					}
+				}
+
+				leaf match_dport {
+					type uint32{
+						range "0..65535";
+					}
+				}
+
+				leaf match_sip {
+					type union {
+						type inet:ip-prefix;
+						type inet:ip-address;
+					}
+				}
+
+				leaf match_dip {
+					type union {
+						type inet:ip-prefix;
+						type inet:ip-address;
+					}
+				}
+			}
+
+		}
+
+
+
+
+		container PBR_INTERFACE_TABLE {
+
+			list PBR_INTERFACE_TABLE_LIST {
+				key "ifname";
+				sonic-ext:custom-validation ValidatePBRINTERFACE;
+
+				leaf ifname{
+					type union {
+						type leafref {
+							path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+						}
+						type leafref {
+							path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+						}
+						type leafref {
+							path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+						}
+					}
+				}
+
+				leaf pbr_map {
+					type string;
+				}
+			}
+
+		}
+
+
+
+	}
+}

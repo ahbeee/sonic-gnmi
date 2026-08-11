@@ -1,0 +1,111 @@
+module sonic-rate {
+    yang-version 1.1;
+    namespace "http://github.com/Azure/sonic-rate";
+    prefix rate;
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    description "Rate YANG Module for SONiC OS";
+
+    revision 2021-03-31 {
+        description "First Revision";
+    }
+
+    container sonic-rate {
+        container RATES {
+            sonic-ext:db-name "COUNTERS_DB";
+            sonic-ext:key-delim ":";
+            config false;
+
+            list RATES_LIST {
+                key "type";
+
+                leaf type {
+                    type enumeration {
+                        enum PORT;
+                        enum RIF;
+                        enum TRAP;
+                        enum TUNNEL;
+                    }
+                    description "RATES type PORT / RIF / TRAP / TUNNEL";
+                }
+
+                choice rate-type {
+                    case port-case {
+                        leaf PORT_SMOOTH_INTERVAL {
+                            when "../type = 'PORT'";
+                            type uint32 {
+                                range "1..1000";
+                            }
+                            description "Smoothing interval for PORT";
+                        }
+
+                        leaf PORT_ALPHA {
+                            when "../type = 'PORT'";
+                            type decimal64 {
+                                fraction-digits 2;
+                            }
+                            description "Alpha value for PORT";
+                        }
+                    }
+
+                    case rif-case {
+                        leaf RIF_SMOOTH_INTERVAL {
+                            when "../type = 'RIF'";
+                            type uint32 {
+                                range "1..1000";
+                            }
+                            description "Smoothing interval for RIF";
+                        }
+
+                        leaf RIF_ALPHA {
+                            when "../type = 'RIF'";
+                            type decimal64 {
+                                fraction-digits 2;
+                            }
+                            description "Alpha value for RIF";
+                        }
+                    }
+
+                    case trap-case {
+                        leaf TRAP_SMOOTH_INTERVAL {
+                            when "../type = 'TRAP'";
+                            type uint32 {
+                                range "1..1000";
+                            }
+                            description "Smoothing interval for TRAP";
+                        }
+
+                        leaf TRAP_ALPHA {
+                            when "../type = 'TRAP'";
+                            type decimal64 {
+                                fraction-digits 2;
+                            }
+                            description "Alpha value for TRAP";
+                        }
+                    }
+
+                    case tunnel-case {
+                        leaf TUNNEL_SMOOTH_INTERVAL {
+                            when "../type = 'TUNNEL'";
+                            type uint32 {
+                                range "1..1000";
+                            }
+                            description "Smoothing interval for TUNNEL";
+                        }
+
+                        leaf TUNNEL_ALPHA {
+                            when "../type = 'TUNNEL'";
+                            type decimal64 {
+                                fraction-digits 2;
+                            }
+                            description "Alpha value for TUNNEL";
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

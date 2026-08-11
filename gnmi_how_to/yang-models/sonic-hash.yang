@@ -1,0 +1,91 @@
+module sonic-hash {
+    namespace "http://github.com/Azure/sonic-hash";
+    yang-version 1.1;
+    prefix hash;
+
+    organization
+            "SONiC";
+
+    description "SONIC GENERIC HASH";
+
+    revision 2025-12-19 {
+        description "First Revision";
+    }
+
+    container sonic-hash {
+
+        container SWITCH_HASH {
+
+            description "SWITCH_HASH part of config_db.json";
+
+            typedef hash-field {
+                description "Represents native hash field";
+                type enumeration {
+                    enum IP_PROTOCOL;
+                    enum DST_IP;
+                    enum SRC_IP;
+                    enum L4_DST_PORT;
+                    enum L4_SRC_PORT;
+                    enum IPV6_FLOW_LABEL;
+                }
+            }
+
+            typedef hash-algorithm {
+                description "Represents hash algorithm";
+                type enumeration {
+                    enum CRC;
+                    enum XOR;
+                    enum CRC_32LO;
+                    enum CRC_32HI;
+                    enum CRC_CCITT;
+                    enum CRC_XOR;
+                }
+            }
+
+            list SWITCH_HASH_LIST {
+                key "name";
+
+                leaf name {
+                    type string {
+                        pattern "GLOBAL"{
+                            error-message "Error: Invalid SWITCH HASH config name";
+                        }
+                    }
+                }
+
+                leaf-list ecmp_hash {
+                    description "Hash fields for hashing packets going through ECMP";
+                    type hash-field;
+                }
+
+                leaf-list lag_hash  {
+                    description "Hash fields for hashing packets going through LAG";
+                    type hash-field;
+                }
+
+                leaf ecmp_hash_algorithm {
+                    description "Hash algorithm for hashing packets going through ECMP";
+                    type hash-algorithm;
+                }
+
+                leaf lag_hash_algorithm {
+                    description "Hash algorithm for hashing packets going through LAG";
+                    type hash-algorithm;
+                }
+
+                leaf ecmp_hash_seed {
+                    description "Hash seed for hashing packets going through ECMP";
+                    type uint32;
+                }
+
+                leaf lag_hash_seed {
+                    description "Hash seed for hashing packets going through LAG";
+                    type uint32;
+                }
+            }
+            /* end of SWITCH_HASH GLOBAL config */
+        }
+        /* end of container SWITCH_HASH */
+    }
+    /* end of container sonic-hash */
+}

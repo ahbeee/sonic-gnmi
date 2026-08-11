@@ -1,0 +1,200 @@
+module sonic-vrrp {
+	namespace "http://github.com/Azure/sonic-vrrp";
+	prefix svrrp;
+	yang-version 1.1;
+
+	import ietf-inet-types {
+		prefix inet;
+	}
+
+	import sonic-port {
+		prefix prt;
+	}
+
+	import sonic-vlan {
+		prefix svlan;
+	}
+
+	import sonic-portchannel {
+		prefix spc;
+	}
+
+	import sonic-extension {
+		prefix sonic-ext;
+	}
+
+	import sonic-vrf {
+		prefix vrf;
+	}
+
+	organization
+		"SONiC";
+
+	contact
+		"SONiC";
+
+	description
+		"SONIC VRRP";
+
+	revision 2019-07-02 {
+		description
+			"Initial revision.";
+	}
+
+	container sonic-vrrp {
+
+		container VRRP_INTERFACE {
+
+			list VRRP_INTERFACE_LIST {
+				key "vrrp_id";
+				sonic-ext:custom-validation ValidateVrrpExist;
+
+				leaf vrrp_id{
+					type string {
+						pattern "Vrrp(2[0-5][0-5]|1[0-9][0-9]|[1-9][0-9]|[1-9])-v(4|6)" {
+							error-message "Invalid VRRP name pattern";
+							error-app-tag vrrp-name-invalid;
+						}
+					}
+				}
+
+				leaf vrf_name {
+					type leafref {
+						path "/vrf:sonic-vrf/vrf:VRF/vrf:VRF_LIST/vrf:vrf_name";
+					}
+				}
+
+				leaf parent_interface {
+					type union {
+						type leafref {
+							path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+						}
+						/*
+						type leafref {
+							path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+						}
+						*/
+						type leafref {
+							path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+						}
+					}
+				}
+			}
+
+			list VRRP_INTERFACE_IPADDR_LIST {
+				key "vrrp_id ip_prefix";
+				sonic-ext:custom-validation ValidateVRRPAddress;
+
+				leaf vrrp_id{
+					type string {
+						pattern "Vrrp(2[0-5][0-5]|1[0-9][0-9]|[1-9][0-9]|[1-9])-v(4|6)" {
+							error-message "Invalid VRRP name pattern";
+							error-app-tag vrrp-name-invalid;
+						}
+					}
+				}
+
+				leaf ip_prefix {
+					type inet:ip-prefix;
+				}
+			}
+
+		}
+
+		container VRRP_GROUP {
+
+			list VRRP_GROUP_LIST {
+				key "vrrp_id parent_interface";
+				sonic-ext:custom-validation ValidateVRRPAttr;
+
+				leaf vrrp_id{
+					type string {
+						pattern "Vrrp(2[0-5][0-5]|1[0-9][0-9]|[1-9][0-9]|[1-9])-v(4|6)" {
+							error-message "Invalid VRRP name pattern";
+							error-app-tag vrrp-name-invalid;
+						}
+					}
+				}
+
+				leaf parent_interface {
+					type union {
+						type leafref {
+							path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+						}
+						/*
+						type leafref {
+							path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+						}*/
+						type leafref {
+							path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+						}
+					}
+				}
+
+				leaf version {
+					type int32{
+						range "2..3";
+					}
+				}
+
+				leaf priority {
+					type int32{
+						range "1..255";
+					}
+				}
+
+				leaf advertisement-interval {
+					type int32{
+						range "10..40950";
+					}
+				}
+
+				leaf preempt {
+					type boolean;
+				}
+
+				leaf shutdown {
+					type boolean;
+				}
+			}
+
+		}
+
+
+		container VRRP_TABLE {
+			config false;
+			sonic-ext:db-name "APPL_DB";
+			sonic-ext:key-delim ":";
+
+			list VRRP_TABLE_LIST {
+				key "vrrp_id";
+
+				leaf vrrp_id{
+					type string {
+						pattern "Vrrp(2[0-5][0-5]|1[0-9][0-9]|[1-9][0-9]|[1-9])-v(4|6)" {
+							error-message "Invalid VRRP name pattern";
+							error-app-tag vrrp-name-invalid;
+						}
+					}
+				}
+
+				leaf parent_interface {
+					type union {
+						type leafref {
+							path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+						}
+						/*
+						type leafref {
+							path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+						}
+						*/
+						type leafref {
+							path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+						}
+					}
+				}
+			}
+
+		}
+	}
+}

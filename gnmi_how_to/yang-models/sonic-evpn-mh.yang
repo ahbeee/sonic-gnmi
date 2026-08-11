@@ -1,0 +1,110 @@
+module sonic-evpn-mh {
+    namespace "http://github.com/Azure/sonic-evpn-mh";
+    prefix evpnmh;
+    yang-version 1.1;
+
+    import sonic-port {
+        prefix prt;
+    }
+
+    import sonic-portchannel {
+        prefix spc;
+    }
+
+    import sonic-vlan {
+        prefix svlan;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC EVPN Multihoming Configuration";
+
+    revision 2025-01-14 {
+        description
+            "Initial revision.";
+    }
+
+
+    container sonic-evpn-mh {
+        container EVPN_MH {
+            list EVPN_MH_LIST {
+                key "name";
+
+                leaf name {
+                    type string {
+                        pattern "global" {
+                            error-message "Error: Invalid EVPN MH name";
+                        }
+                    }
+                    description "EVPN MH global configuration";
+                }
+
+                leaf advertise_unreach_nbr {
+                    type boolean;
+                }
+
+                leaf redirect_off {
+                    type boolean;
+                }
+
+                leaf startup_delay {
+                    type uint16 {
+                        range 0..3600;
+                    }
+                }
+
+                leaf mac_holdtime {
+                    type uint32{
+                        range 0..86400;
+                    }
+                }
+
+                leaf neigh_holdtime {
+                    type uint32{
+                        range 0..86400;
+                    }
+                }
+            }
+        }
+
+        container EVPN_MH_INTF {
+            list EVPN_MH_INTF_LIST {
+                key "if_name";
+
+                leaf if_name {
+                    type union {
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        type leafref {
+                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+                        }
+                        type leafref {
+                            path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                        }
+                    }
+                }
+
+                leaf uplink {
+                    type boolean;
+                }
+
+                leaf es_df_pref {
+                    type boolean;
+                }
+
+                leaf es_df_pref_value {
+                    type uint16 {
+                        range 1..65535;
+                    }
+                }
+            }
+        }
+
+    }
+}

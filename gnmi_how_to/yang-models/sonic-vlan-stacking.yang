@@ -1,0 +1,86 @@
+module sonic-vlan-stacking {
+    namespace "http://github.com/Azure/sonic-vlan-stacking";
+    prefix vlan-stacking;
+    yang-version 1.1;
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    import sonic-common {
+        prefix scommon;
+    }
+
+    import sonic-port {
+        prefix prt;
+    }
+
+    import sonic-portchannel {
+        prefix spc;
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC VLAN STACKING";
+
+    revision 2019-05-15 {
+        description
+            "Initial revision.";
+    }
+
+
+    container sonic-vlan-stacking {
+        container VLAN_STACKING {
+            description "VLAN_STACKING part of config_db.json";
+
+            list VLAN_STACKING_LIST {
+                key "port stage vlanid";
+                sonic-ext:custom-validation ValidateStageAction;
+
+                leaf port {
+                    type union {
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        type leafref {
+                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+                        }
+                    }
+                }
+
+                leaf stage {
+                    type string {
+                        pattern 'ingress|egress';
+                    }
+                }
+
+                leaf vlanid {
+                    type uint16 {
+                        range 1..4094;
+                    }
+                }
+
+                leaf action {
+                    type string {
+                        pattern 'push|pop|swap';
+                    }
+                }
+
+                leaf s_vlanid {
+                    type uint16 {
+                        range 1..4094;
+                    }
+                }
+            }
+        }
+    }
+
+}

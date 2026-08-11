@@ -1,0 +1,69 @@
+module sonic-pfc-priority-queue-map {
+
+    yang-version 1.1;
+
+    namespace "http://github.com/Azure/sonic-pfc-priority-queue-map";
+
+    prefix ppqm;
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "PFC_PRIORITY_TO_QUEUE_MAP yang Module for SONiC OS";
+
+    revision 2021-04-15 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-pfc-priority-queue-map {
+
+        container MAP_PFC_PRIORITY_TO_QUEUE {
+
+            description "MAP_PFC_PRIORITY_TO_QUEUE part of config_db.json";
+
+            list MAP_PFC_PRIORITY_TO_QUEUE_LIST {
+
+                key "name";
+                sonic-ext:map-list "true"; //special annotation for map table
+                sonic-ext:map-leaf "pfc_priority qindex"; //every key:value pair is mapped to list keys, e.g. "1":"7" ==> pfc_priority=1, qindex=7
+
+                sonic-ext:custom-validation ValidatePfctoQueue;
+                leaf name {
+                    type string;
+                }
+
+                list MAP_PFC_PRIORITY_TO_QUEUE_INTERNAL_LIST { //this is list inside list for storing mapping between two fields
+
+                    key "pfc_priority qindex";
+
+                    leaf pfc_priority {
+                        type string {
+                            pattern "[0-7]?" {
+                               error-message "Invalid pfc priority";
+                               error-app-tag pfc-priority-invalid;
+                            }
+                        }
+                    }
+
+                    leaf qindex {
+                        type string {
+                            pattern "[0-7]?" {
+                               error-message "Invalid queue index";
+                               error-app-tag queue-index-invalid;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

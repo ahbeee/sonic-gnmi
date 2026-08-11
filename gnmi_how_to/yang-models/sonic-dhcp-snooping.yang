@@ -1,0 +1,108 @@
+module sonic-dhcp-snooping {
+    namespace "http://github.com/Azure/sonic-dhcp-snooping";
+    prefix sdhcpsnp;
+    yang-version 1.1;
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    import sonic-vlan {
+        prefix svlan;
+    }
+
+    import sonic-port {
+        prefix prt;
+    }
+
+    import sonic-portchannel {
+        prefix spc;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC DHCP SNOOPING";
+
+    revision 2020-01-15 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-dhcp-snooping {
+
+        container DHCPSNP {
+            description
+                "Configures global DHCP snooping";
+            list DHCPSNP_LIST {
+                key "param";
+
+                leaf param {
+                    type enumeration {
+                        enum GLOBAL;
+                    }
+                }
+
+                leaf IPv4 {
+                    type string {
+                        pattern 'disable|enable';
+                    }
+                    default "disable";
+                }
+            }
+        }
+
+        container DHCPSNP_VLAN {
+            description
+                "Configures VLAN DHCP snooping";
+            list DHCPSNP_VLAN_LIST {
+                key "vlan_name";
+                sonic-ext:custom-validation ValidateDHCPSNPvlan;
+
+                leaf vlan_name {
+                    type leafref {
+                        path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                    }
+                }
+
+                leaf admin_status {
+                    type string {
+                        pattern 'disable|enable';
+                    }
+                    default "enable";
+                }
+            }
+        }
+
+        container DHCPSNP_TRUST {
+            description
+                "Configures trusted ports";
+            list DHCPSNP_TRUST_LIST {
+                key "port_name";
+                sonic-ext:custom-validation ValidateDHCPSNPtrust;
+
+                leaf port_name {
+                    type union {
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        type leafref {
+                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+                        }
+                    }
+                }
+
+                leaf trust {
+                    type string {
+                        pattern 'disable|enable';
+                    }
+                    default "enable";
+                }
+            }
+        }
+    }
+}

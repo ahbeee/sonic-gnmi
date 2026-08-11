@@ -1,0 +1,51 @@
+module sonic-dot1p-tc-map {
+    namespace "http://github.com/Azure/sonic-dot1p-tc-map";
+    prefix dot1ptm;
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC DOT1P_TO_TC_MAP";
+
+    revision 2021-08-12 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-dot1p-tc-map {
+
+        container DOT1P_TO_TC_MAP {
+
+            list DOT1P_TO_TC_MAP_LIST {
+                key "name";
+                sonic-ext:map-list "true"; //special annotation for map table
+                sonic-ext:map-leaf "dot1p tc_num"; //every key:value pair is mapped to list keys, e.g. "1":"7" ==> dot1p=1, tc_num=7
+                sonic-ext:custom-validation ValidateDot1ptoTc;
+
+                leaf name {
+                    type string;
+                }
+
+                list DOT1P_TO_TC_MAP_INTERNAL_LIST { //this is list inside list for storing mapping between two fields
+                    key "dot1p tc_num";
+
+                    leaf dot1p {
+                        type string;
+                    }
+
+                    leaf tc_num {
+                        type string;
+                    }
+                }
+            }
+        }
+    }
+}

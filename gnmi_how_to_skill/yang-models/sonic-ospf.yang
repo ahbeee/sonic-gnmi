@@ -1,0 +1,156 @@
+module sonic-ospf {
+    namespace "http://github.com/Azure/sonic-ospf";
+    prefix sospf;
+    yang-version 1.1;
+
+    import sonic-vrf {
+        prefix svrf;
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC OSPFv2";
+
+    revision 2026-01-15 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-ospf {
+        container OSPF {
+            list OSPF_LIST {
+                key "vrf_name";
+                sonic-ext:custom-validation ValidateOSPFv2Configuration;
+
+                leaf vrf_name {
+                    //not support vrf currently
+                    type string {
+                        pattern "default";
+                    }
+                }
+
+                leaf router_id {
+                    type inet:ipv4-address;
+                }
+
+                leaf auto_cost_rf_bw {
+                    //range "1..4294967", use 0 to clear
+                    type uint32 {
+                        range "0..4294967";
+                    }
+                }
+
+                leaf passive_interface_default {
+                    type boolean;
+                }
+            }
+
+            list OSPF_REDISTRIBUTE_LIST {
+                key "vrf_name redistribute";
+                sonic-ext:custom-validation ValidateOSPFv2Redistribute;
+
+                leaf vrf_name {
+                    type string {
+                        pattern "default";
+                    }
+                }
+
+                leaf redistribute {
+                    type enumeration {
+                        enum bgp;
+                        enum connected;
+                        enum rip;
+                        enum static;
+                    }
+                }
+
+                leaf redistribute_metric {
+                    type uint32 {
+                        range "0..16777214";
+                    }
+                    default 20;
+                }
+
+                leaf redistribute_metric_type {
+                    type uint8 {
+                        range "1..2";
+                    }
+                    default 2;
+                }
+            }
+        }
+
+        container OSPF_NETWORK {
+            list OSPF_NETWORK_LIST {
+                key "vrf_name ip_prefix";
+                sonic-ext:custom-validation ValidateOSPFv2Network;
+
+                leaf vrf_name {
+                    type string {
+                        pattern "default";
+                    }
+                }
+
+                leaf ip_prefix {
+                    type inet:ipv4-prefix;
+                }
+
+                leaf area_id {
+                    type union {
+                        type uint32 {
+                            range "0..4294967295";
+                        }
+                        type inet:ipv4-address;
+                    }
+                    mandatory true;
+                }
+            }
+        }
+
+        container OSPF_AREA {
+            list OSPF_AREA_LIST {
+                key "vrf_name area_id";
+                sonic-ext:custom-validation ValidateOSPFv2Area;
+
+                leaf vrf_name {
+                    type string {
+                        pattern "default";
+                    }
+                }
+
+                leaf area_id {
+                    type union {
+                        type uint32 {
+                            range "0..4294967295";
+                        }
+                        type inet:ipv4-address;
+                    }
+                }
+
+                leaf authentication {
+                    type enumeration {
+                        enum disable;
+                        enum enable;
+                        enum message-digest;
+                    }
+                    default disable;
+                }
+
+            }
+        }
+    }
+}

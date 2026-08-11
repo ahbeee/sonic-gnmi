@@ -1,0 +1,126 @@
+module sonic-vlan-interface {
+    namespace "http://github.com/Azure/sonic-vlan-interface";
+    prefix sVlanIf;
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import sonic-vlan {
+        prefix svlan;
+    }
+
+    import sonic-vrf {
+        prefix vrf;
+    }
+
+    import ietf-yang-types {
+        prefix yang;
+    }
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC VLAN INTERFACE";
+
+    revision 2019-07-02 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-vlan-interface {
+
+        container VLAN_INTERFACE {
+
+            list VLAN_INTERFACE_LIST {
+                key "vlanName";
+                sonic-ext:custom-validation ValidateVlanInterface;
+
+                leaf vlanName{
+                    type leafref {
+                        path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                    }
+                }
+                leaf vrf_name {
+                    type leafref {
+                        path "/vrf:sonic-vrf/vrf:VRF/vrf:VRF_LIST/vrf:vrf_name";
+                    }
+                }
+                leaf static_anycast_gateway {
+                    description "Enable/disable static anycast gateway for the vlan interface";
+                    type boolean;
+                    default false;
+                }
+                leaf ipv6_use_link_local_only {
+                    type enumeration {
+                        enum enable;
+                        enum disable;
+                    }
+                }
+
+                leaf grat_arp {
+                    type string {
+                        pattern "enabled|disabled";
+                    }
+                }
+
+                leaf nat_zone {
+                    sonic-ext:custom-validation ValidateNatIntf;
+                    description "NAT Zone for the vlan interface";
+                    type uint8 {
+                        range "0..3" {
+                            error-message "Invalid nat zone for the vlan interface.";
+                            error-app-tag nat-zone-invalid;
+                        }
+                    }
+                }
+            }
+            list VLAN_INTERFACE_IPADDR_LIST {
+                key "vlanName ip_prefix";
+
+                leaf vlanName{
+                    type leafref {
+                        path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                    }
+                }
+
+                leaf ip_prefix {
+                    sonic-ext:custom-validation ValidateVlanInterfaceIPAddr;
+                    type inet:ip-prefix;
+
+                }
+                leaf secondary {
+                    type boolean;
+                }
+            }
+        }
+
+        container INTF_TABLE {
+            config false;
+            sonic-ext:db-name "APPL_DB";
+            sonic-ext:key-delim ":";
+
+            list INTF_TABLE_LIST {
+                key "vlanName";
+
+                leaf vlanName {
+                    type leafref {
+                        path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                    }
+                }
+
+                leaf mac_addr {
+                    type yang:mac-address;
+                }
+            }
+        }
+    }
+}

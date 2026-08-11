@@ -1,0 +1,219 @@
+module sonic-portchannel {
+    namespace "http://github.com/Azure/sonic-portchannel";
+    prefix spc;
+
+    import sonic-common {
+        prefix scommon;
+    }
+
+    import sonic-port {
+        prefix prt;
+    }
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC PORTCHANNEL";
+
+    revision 2019-05-15 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-portchannel {
+
+        container PORTCHANNEL {
+
+            list PORTCHANNEL_LIST {
+                key "name";
+
+                leaf name {
+                    sonic-ext:custom-validation ValidatePch;
+                    type string {
+                        pattern "PortChannel([0-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-9][0-9][0-9][0-9])" {
+                            error-message "Invalid PortChannel name pattern";
+                            error-app-tag portchannel-name-invalid;
+                        }
+                    }
+                }
+
+                leaf admin_status {
+                    type scommon:admin-status;
+                    default up;
+                }
+
+                leaf mtu {
+                    type uint32 {
+                        range "1312..9216" {
+                            error-message "Invalid MTU value";
+                            error-app-tag mtu-invalid;
+                        }
+                    }
+                }
+
+                leaf static {
+                    type boolean;
+                }
+
+                leaf lacp_key {
+                    type union {
+                        type string {
+                            pattern "auto";
+                        }
+                        type uint16 {
+                            range 1..65535;
+                        }
+                    }
+                }
+
+                leaf min_links {
+                    type uint16 {
+                        range 1..1024;
+                    }
+                }
+
+                leaf fallback {
+                    type boolean;
+                }
+
+                leaf fast_rate {
+                    description "Enable LACP fast rate";
+                    type boolean;
+                }
+
+                leaf mix_speed {
+                    type boolean;
+                }
+
+                leaf pms_enable {
+                    description "Enable/Disable PMS";
+                    type string {
+                        pattern "yes|no";
+                    }
+                    sonic-ext:custom-validation ValidatePMSenable;
+                }
+
+                leaf pms_maximum {
+                    description "Set the maximum number of allowed MAC addresses on a port";
+                    type uint16 {
+                        range "1..4097" {
+                            error-message "Invalid value";
+                        }
+                    }
+                    default 1;
+                    sonic-ext:custom-validation ValidatePMSmaximum;
+                }
+
+                leaf pms_violation {
+                    description "PMS violation action (\"Protect\"/\"Restrict\"/\"Shutdown\")";
+                    type string {
+                        pattern "protect|restrict|shutdown";
+                    }
+                    default "protect";
+                    sonic-ext:custom-validation ValidatePMSviolation;
+                }
+
+                leaf description {
+                    type string {
+                        pattern '[ -~]{0,64}';
+                    }
+                }
+            }
+        }
+
+        container PORTCHANNEL_MEMBER {
+
+            list PORTCHANNEL_MEMBER_LIST {
+                key "name ifname";
+
+                leaf name {
+                    type leafref {
+                        path "../../../PORTCHANNEL/PORTCHANNEL_LIST/name";
+                    }
+                }
+
+                leaf ifname {
+                    sonic-ext:custom-validation ValidatePchMember;
+                    type leafref {
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                    }
+                }
+            }
+        }
+
+        container LAG_TABLE {
+            sonic-ext:db-name "APPL_DB";
+            sonic-ext:key-delim ":";
+            config false;
+
+            list LAG_TABLE_LIST {
+                key "lagname";
+
+                leaf lagname {
+                    type leafref {
+                        path "../../../PORTCHANNEL/PORTCHANNEL_LIST/name";
+                    }
+                }
+
+                leaf admin_status {
+                    type scommon:admin-status;
+                }
+
+                leaf mtu {
+                    type uint32 {
+                        range "1312..9216" {
+                            error-message "Invalid MTU value";
+                            error-app-tag mtu-invalid;
+                        }
+                    }
+                }
+
+                leaf active {
+                    type boolean;
+                }
+
+                leaf name {
+                    type string;
+                }
+
+                leaf oper_status {
+                    type scommon:oper-status;
+                }
+
+                //control to disable traffic collection and distribution for all LAG member ports
+                leaf traffic_disable {
+                    type boolean;
+                }
+            }
+        }
+
+        container LAG_MEMBER_TABLE {
+            sonic-ext:db-name "APPL_DB";
+            sonic-ext:key-delim ":";
+            config false;
+            list LAG_MEMBER_TABLE_LIST {
+                key "name ifname";
+
+                leaf name {
+                    type leafref {
+                        path "../../../PORTCHANNEL/PORTCHANNEL_LIST/name";
+                    }
+                }
+
+                leaf ifname {
+                    type leafref {
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                    }
+                }
+            }
+        }
+    }
+}

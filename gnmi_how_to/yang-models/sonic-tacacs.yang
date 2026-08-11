@@ -1,0 +1,156 @@
+module sonic-tacacs {
+    namespace "http://github.com/Azure/sonic-tacacs";
+    prefix stacacs;
+    yang-version 1.1;
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import sonic-port {
+        prefix port;
+    }
+
+    import sonic-portchannel {
+        prefix lag;
+    }
+
+    import sonic-vlan {
+        prefix svlan;
+    }
+
+    revision 2021-04-15 {
+        description "Initial revision.";
+    }
+
+    typedef auth_type_enumeration {
+        type enumeration {
+            enum pap;
+            enum chap;
+            enum mschap;
+            enum login;
+        }
+    }
+
+    container sonic-tacacs {
+
+        container TACPLUS_SERVER {
+            list TACPLUS_SERVER_LIST {
+                key "ipaddress";
+
+                leaf ipaddress {
+                    type inet:ip-address;
+                    description
+                        "TACACS+ server's IPv4 address";
+                }
+
+                leaf priority {
+                    default 1;
+                    type uint8 {
+                        range "1..64" {
+                            error-message "TACACS server priority must be 1..64";
+                        }
+                    }
+                    description "Server priority";
+                }
+
+                leaf tcp_port {
+                    type inet:port-number;
+                    default 49;
+                    description "TCP port to communite with TACACS+ server";
+                }
+
+                leaf timeout {
+                    type uint16 {
+                        range "1..60" {
+                            error-message "TACACS server timeout must be 1..60";
+                        }
+                    }
+                    description "TACACS+ server timeout";
+                }
+
+                leaf auth_type {
+                    type auth_type_enumeration;
+                    description "Authentication type";
+                }
+
+                leaf passkey {
+                    type string {
+                        length "1..200";
+                        pattern "[^ #,]*" {
+                            error-message 'TACACS shared secret (Valid chars are ASCII printable except SPACE, "#", and ",")';
+                        }
+                    }
+                }
+
+                leaf vrf {
+                    type string {
+                        pattern "mgmt|default" {
+                            error-message "Error: Invalid VRF name";
+                        }
+                    }
+                    description
+                        "VRF name";
+                }
+
+                leaf source_interface {
+                    type union {
+                        type leafref {
+                            path "/port:sonic-port/port:PORT/port:PORT_LIST/port:ifname";
+                        }
+                        type leafref {
+                            path "/lag:sonic-portchannel/lag:PORTCHANNEL/lag:PORTCHANNEL_LIST/lag:name";
+                        }
+                        type leafref {
+                            path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                        }
+                    }
+                }
+
+            }
+        }
+
+
+        container TACPLUS {
+            list TACPLUS_LIST {
+                key "name";
+
+                leaf name {
+                    type string {
+                        pattern "global" {
+                            error-message "Error: Invalid TACPLUS name";
+                        }
+                    }
+                    description "TACPLUS global configuration";
+                }
+
+                leaf auth_type {
+                    type auth_type_enumeration;
+                }
+
+                leaf timeout {
+                    type uint16 {
+                        range "1..60" {
+                            error-message "TACACS timeout must be 1..60";
+                        }
+                    }
+                }
+
+                leaf passkey {
+                    type string {
+                        length "1..200";
+                        pattern "[^ #,]*" {
+                            error-message 'TACACS shared secret (Valid chars are ASCII printable except SPACE, "#", and ",")';
+                        }
+                    }
+                    description "Shared secret used for encrypting the communication";
+                }
+
+                leaf src_ip {
+                    type inet:ip-address;
+                    description "Source IP";
+                }
+            }
+        }
+    }
+}

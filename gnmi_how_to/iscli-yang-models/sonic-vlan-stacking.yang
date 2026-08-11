@@ -1,0 +1,74 @@
+module sonic-vlan-stacking {
+
+    yang-version 1.1;
+
+    namespace "http://github.com/Azure/sonic-vlan-stacking";
+    prefix vlan-stacking;
+
+    import sonic-extension {
+        prefix ext;
+        revision-date 2019-07-01;
+    }
+
+    import sonic-port {
+        prefix port;
+        revision-date 2019-07-01;
+    }
+
+    import sonic-portchannel {
+        prefix lag;
+        revision-date 2021-06-13;
+    }
+
+    description "VLAN Stacking YANG Module for SONiC OS";
+
+    revision 2021-12-15 {
+        description "First Revision";
+    }
+
+    container sonic-vlan-stacking {
+        container VLAN_STACKING {
+            description "VLAN_STACKING part of config_db.json";
+
+            list VLAN_STACKING_LIST {
+                key "port stage vlanid";
+
+                leaf port {
+                    type union {
+                        type leafref {
+                            path "/port:sonic-port/port:PORT/port:PORT_LIST/port:name";
+                        }
+                        type leafref {
+                            path "/lag:sonic-portchannel/lag:PORTCHANNEL/lag:PORTCHANNEL_LIST/lag:name";
+                        }
+                    }
+                }
+
+                leaf stage {
+                    type string {
+                        pattern 'ingress|egress';
+                    }
+                }
+
+                leaf vlanid {
+                    type uint16 {
+                        range 1..4094;
+                    }
+                }
+
+                leaf action {
+                    type string {
+                        pattern 'push|pop|swap';
+                    }
+                }
+
+                leaf s_vlanid {
+                    type uint16 {
+                        range 1..4094;
+                    }
+                }
+            }
+        }
+    }
+}
+

@@ -1,0 +1,93 @@
+module sonic-drop-counter {
+    namespace "http://github.com/Azure/sonic-drop-counter";
+    prefix drop-counter;
+    yang-version 1.1;
+
+    import ietf-yang-types {
+        prefix yang;
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import sonic-common {
+        prefix scommon;
+    }
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC DROP COUNTER";
+
+    revision 2025-03-06 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-drop-counter {
+        container DEBUG_COUNTER {
+            list DEBUG_COUNTER_LIST {
+                key "name";
+                sonic-ext:custom-validation ValidateDropCounter;
+
+                leaf name {
+                     type string {
+                        length 1..255;
+                    }
+                }
+
+                leaf alias {
+                    type string {
+                        length 1..255;
+                    }
+                }
+
+                leaf desc {
+                    type string {
+                        length 1..255;
+                    }
+                }
+
+                leaf group {
+                    type string {
+                        length 1..255;
+                    }
+                }
+
+                leaf type {
+                    type string {
+                        length 1..255;
+                    }
+                }
+            }
+        }
+
+        container DEBUG_COUNTER_DROP_REASON {
+            list DEBUG_COUNTER_DROP_REASON_LIST {
+                key "name reason";
+                sonic-ext:custom-validation ValidateDropReasons;
+
+                leaf name {
+                     type string {
+                        length 1..255;
+                    }
+                }
+
+                leaf reason {
+                     type string {
+                        length 1..255;
+                    }
+                }
+            }
+        }
+    }
+}

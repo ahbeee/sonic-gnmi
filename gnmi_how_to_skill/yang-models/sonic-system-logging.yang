@@ -1,0 +1,145 @@
+module sonic-system-logging{
+
+    yang-version 1.1;
+
+    namespace "http://github.com/Azure/sonic-system-logging";
+    prefix sslog;
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    import sonic-port {
+        prefix prt;
+    }
+
+    import sonic-portchannel {
+        prefix spc;
+    }
+
+    import sonic-vlan {
+        prefix svlan;
+    }
+
+    import sonic-loopback-interface {
+        prefix sonic-lo-if;
+    }
+
+    import sonic-vrf {
+        prefix vrf;
+    }
+
+    revision 2020-05-29 {
+        description "Initial version.";
+    }
+
+    container sonic-system-logging{
+        container SYSLOG_SERVER{
+            list SYSLOG_SERVER_LIST{
+                key "host";
+                sonic-ext:custom-validation ValidateSyslogServer;
+
+                leaf host{
+                    type inet:host;
+                    sonic-ext:custom-validation ValidateIpHost;
+                }
+
+                leaf remote-port {
+                    type inet:port-number;
+                    default 514;
+                }
+
+                leaf port {
+                    type inet:port-number {
+                        range "0..65535" {
+                            error-message "SYSLOG SERVER UDP port is out of range";
+                        }
+                    }
+                }
+
+                leaf severity {
+                    type enumeration {
+                        enum emerg;
+                        enum alert;
+                        enum crit;
+                        enum error;
+                        enum warning;
+                        enum notice;
+                        enum info;
+                        enum debug;
+                    }
+                }
+
+                leaf source_interface {
+                    type union {
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        type leafref {
+                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+                        }
+                        type leafref {
+                            path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                        }
+
+                        type leafref {
+                            path "/sonic-lo-if:sonic-loopback-interface/sonic-lo-if:LOOPBACK_INTERFACE/sonic-lo-if:LOOPBACK_INTERFACE_LIST/sonic-lo-if:loIfName";
+                        }
+                    }
+                }
+
+                leaf vrf {
+                    description "Syslog VRF device";
+                    type union {
+                        type leafref {
+                            path "/vrf:sonic-vrf/vrf:VRF/vrf:VRF_LIST/vrf:vrf_name";
+                        }
+                        type enumeration {
+                            enum default;
+                            enum mgmt;
+                        }
+                    }
+                    must "(current() != 'mgmt')
+                    or (/vrf:sonic-vrf/vrf:MGMT_VRF_CONFIG/vrf:MGMT_VRF_CONFIG_LIST/vrf:mgmtVrfEnabled = 'true')";
+                }
+
+                leaf protocol {
+                    description "The protocol to send logs to remote server";
+                    type enumeration {
+                        enum tcp;
+                        enum udp;
+                    }
+                }
+            }
+        }
+
+        container SYSLOG_CONFIG{
+            list SYSLOG_CONFIG_LIST{
+                key "name";
+                sonic-ext:custom-validation ValidateSyslogConfig;
+
+                leaf name{
+                    type string {
+                        pattern "GLOBAL";
+                    }
+                }
+
+                leaf format {
+                    type string{
+                        //default = rfc3164 = no setting
+                        pattern 'rfc5424|welf';
+                    }
+                }
+
+                leaf welf_firewall_name {
+                    type string{
+                        length 1..16;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,219 @@
+module sonic-system-ntp {
+    namespace "http://github.com/Azure/sonic-system-ntp";
+    prefix ssntp;
+    yang-version 1.1;
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import sonic-vrf {
+        prefix vrf;
+    }
+
+    import sonic-port {
+        prefix prt;
+    }
+
+    import sonic-vlan {
+        prefix svlan;
+    }
+
+    import sonic-loopback-interface {
+        prefix sonic-lo-if;
+    }
+
+    revision 2020-05-26 {
+        description "Initial version.";
+    }
+
+    revision 2024-01-01 {
+        description "Add NTP global and NTP_KEY tables.";
+    }
+
+    typedef enabled-disabled {
+        description "Enabled/Disabled configuration";
+        type enumeration {
+            enum enabled;
+            enum disabled;
+        }
+    }
+
+    typedef on-off {
+        description "On/Off configuration";
+        type enumeration {
+            enum on;
+            enum off;
+        }
+    }
+
+    typedef association-type {
+        description "NTP server association type";
+        type enumeration {
+            enum server;
+            enum pool;
+        }
+    }
+
+
+    container sonic-system-ntp{
+
+        container NTP {
+            list NTP_LIST {
+                key "name";
+
+                leaf name {
+                    type string {
+                        pattern "global";
+                    }
+                }
+                leaf admin_state {
+                    type enabled-disabled;
+                    default disabled;
+                }
+
+                leaf authentication {
+                    type enabled-disabled;
+                    default disabled;
+                }
+
+                leaf dhcp {
+                    type enabled-disabled;
+                    default disabled;
+                }
+
+                leaf server_role {
+                    type enabled-disabled;
+                    default disabled;
+                }
+
+                leaf src_intf {
+                    type union {
+                        //default is null setting
+                        type string {
+                            pattern "eth0";
+                        }
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        type leafref {
+                            path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                        }
+                        type leafref {
+                            path "/sonic-lo-if:sonic-loopback-interface/sonic-lo-if:LOOPBACK_INTERFACE/sonic-lo-if:LOOPBACK_INTERFACE_LIST/sonic-lo-if:loIfName";
+                        }
+                    }
+                }
+
+                leaf vrf {
+                    type union {
+                        type string {
+                            pattern "default";
+                        }
+                        type leafref {
+                            path "/vrf:sonic-vrf/vrf:VRF/vrf:VRF_LIST/vrf:vrf_name";
+                        }
+                    }
+                    default "default";
+                }
+            }
+        }
+
+        container NTP_KEY {
+            list NTP_KEY_LIST {
+                key "id";
+                sonic-ext:custom-validation ValidateNTPKeyConfig;
+
+                leaf id {
+                    type uint16 {
+                        range "1..65535";
+                    }
+                }
+
+                leaf type {
+                    type enumeration {
+                        enum md5;
+                        enum sha1;
+                        enum sha256;
+                        enum sha384;
+                        enum sha512;
+                    }
+                }
+
+                leaf value {
+                    type string;
+                }
+
+                leaf trusted {
+                    type enumeration {
+                        enum yes;
+                        enum no;
+                    }
+                    default yes;
+                }
+            }
+        }
+
+        container NTP_SERVER {
+            list NTP_SERVER_LIST {
+                key "address";
+                sonic-ext:custom-validation ValidateNTPConfig;
+
+                leaf address {
+                    type inet:host;
+                }
+                leaf  port {
+                    type inet:port-number;
+                    default 123;
+                }
+
+                leaf iburst {
+                    type on-off;
+                }
+
+                leaf prefer {
+                    type on-off;
+                }
+
+                leaf minpoll {
+                    type uint8 {
+                        range "3..17"{
+                            error-message "minpoll value must be between 3 and 17";
+                            error-app-tag minpoll-invalid;
+                        }
+                    }
+                    default 6;
+                }
+
+                leaf maxpoll {
+                    type uint8 {
+                        range "3..17"{
+                            error-message "maxpoll value must be between 3 and 17.";
+                            error-app-tag maxpoll-invalid;
+                        }
+                    }
+                    default 10;
+                }
+
+                leaf association_type {
+                    type association-type;
+                    default server;
+                }
+
+                leaf resolve_as {
+                    type inet:host;
+                }
+
+                leaf key {
+                    type leafref {
+                        path "/ssntp:sonic-system-ntp/ssntp:NTP_KEY/ssntp:NTP_KEY_LIST/ssntp:id";
+                    }
+                }
+            }
+        }
+    }
+}

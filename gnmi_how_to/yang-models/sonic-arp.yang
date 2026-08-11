@@ -1,0 +1,110 @@
+module sonic-arp {
+    namespace "http://github.com/Azure/arp";
+    prefix sARP;
+    yang-version 1.1;
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    import ietf-yang-types {
+        prefix yang;
+    }
+
+    import sonic-port {
+        prefix prt;
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import sonic-vlan {
+        prefix svlan;
+    }
+
+    import sonic-mgmt-interface {
+        prefix smgmtint;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC ARP";
+
+    revision 2021-06-25 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-arp {
+
+        container NEIGH {
+
+            list NEIGH_LIST {
+                key "if-name ip-addr";
+                max-elements 512;
+                leaf if-name {
+                    description "Interface name: port/VLAN";
+                    type union {
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        type leafref {
+                            path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                        }
+                    }
+                }
+
+                leaf ip-addr {
+                    type inet:ip-address;
+                }
+
+                leaf neigh {
+                    type yang:mac-address;
+                    description "neighbor MAC address";
+                }
+            }
+        }
+
+        container NEIGH_TABLE {
+            config false;
+            sonic-ext:db-name "APPL_DB";
+            sonic-ext:key-delim ":";
+
+            list NEIGH_TABLE_LIST {
+                key "if-name ip-addr";
+
+                leaf if-name {
+                    description "Interface name: port/VLAN";
+                    type union {
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        type leafref {
+                            path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                        }
+                    }
+                }
+
+                leaf ip-addr {
+                    type inet:ip-address;
+                }
+
+                leaf neigh {
+                    type yang:mac-address;
+                    description "neighbor MAC address";
+                }
+
+                leaf family {
+                    type string;
+                    default IPv4;
+                }
+            }
+        }
+    }
+}

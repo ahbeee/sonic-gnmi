@@ -1,0 +1,196 @@
+module sonic-radius {
+    namespace "http://github.com/Azure/sonic-radius";
+    prefix sradius;
+    yang-version 1.1;
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import sonic-port {
+        prefix port;
+    }
+
+    import sonic-portchannel {
+        prefix lag;
+    }
+
+    /*
+    import sonic-vlan {
+        prefix vlan;
+    }
+    */
+
+    import sonic-loopback-interface {
+        prefix sonic-lo-if;
+    }
+
+    revision 2021-04-15 {
+        description "Initial revision.";
+    }
+
+    typedef auth_type_enumeration {
+        type enumeration {
+            enum pap;
+            enum chap;
+            enum mschapv2;
+        }
+    }
+
+    container sonic-radius {
+
+        container RADIUS_SERVER {
+            list RADIUS_SERVER_LIST {
+                key "ipaddress";
+
+                leaf ipaddress {
+                    type inet:ip-address;
+                    description
+                        "RADIUS server's IPv4 address";
+                }
+
+                leaf priority {
+                    default 1;
+                    type uint8 {
+                        range "1..64" {
+                            error-message "RADIUS server priority must be 1..64";
+                        }
+                    }
+                    description "Server priority";
+                }
+
+                leaf auth_port {
+                    type inet:port-number;
+                    default 1812;
+                    description "TCP port to communite with RADIUS server";
+                }
+
+                leaf timeout {
+                    type uint16 {
+                        range "1..60" {
+                            error-message "RADIUS server timeout must be 1..60";
+                        }
+                    }
+                    description "RADIUS server timeout";
+                }
+
+                leaf retransmit {
+                    type uint16 {
+                        range "1..10" {
+                            error-message "RADIUS server retransmit attempts must be 1..10";
+                        }
+                    }
+                    description "RADIUS server retransmit";
+                }
+
+                leaf auth_type {
+                    type auth_type_enumeration;
+                    description "Authentication type";
+                }
+
+                leaf passkey {
+                    type string {
+                        length "1..200";
+                        pattern "[^ #,]*" {
+                            error-message 'RADIUS shared secret (Valid chars are ASCII printable except SPACE, "#", and ",")';
+                        }
+                    }
+                }
+
+                leaf vrf {
+                    type string {
+                        pattern "mgmt|default" {
+                            error-message "Error: Invalid VRF name";
+                        }
+                    }
+                    description
+                        "VRF name";
+                }
+                leaf src_intf {
+                    type union {
+                        type leafref {
+                            path "/port:sonic-port/port:PORT/port:PORT_LIST/port:ifname";
+                        }
+                        type leafref {
+                            path "/lag:sonic-portchannel/lag:PORTCHANNEL/lag:PORTCHANNEL_LIST/lag:name";
+                        }
+                        /*
+                        type leafref {
+                            path "/vlan:sonic-vlan/vlan:VLAN/vlan:VLAN_LIST/vlan:name";
+                        }
+                        */
+                        type string {
+                            pattern 'Vlan([0-9]{1,3}|[1-3][0-9]{3}|[4][0][0-8][0-9]|[4][0][9][0-4])|eth([0-9])'{
+                                error-message "Error: Invalid interface name";
+                            }
+                        }
+                        type leafref {
+                            path "/sonic-lo-if:sonic-loopback-interface/sonic-lo-if:LOOPBACK_INTERFACE/sonic-lo-if:LOOPBACK_INTERFACE_LIST/sonic-lo-if:loIfName";
+                        }
+                    }
+                }
+            }
+        }
+
+
+        container RADIUS {
+            list RADIUS_LIST {
+                key "name";
+
+                leaf name {
+                    type string {
+                        pattern "global" {
+                            error-message "Error: Invalid RADIUS name";
+                        }
+                    }
+                    description "RADIUS global configuration";
+                }
+
+                leaf auth_type {
+                    type auth_type_enumeration;
+                }
+
+                leaf timeout {
+                    type uint16 {
+                        range "1..60" {
+                            error-message "RADIUS timeout must be 1..60";
+                        }
+                    }
+                }
+
+                leaf passkey {
+                    type string {
+                        length "1..200";
+                        pattern "[^ #,]*" {
+                            error-message 'RADIUS shared secret (Valid chars are ASCII printable except SPACE, "#", and ",")';
+                        }
+                    }
+                    description "Shared secret used for encrypting the communication";
+                }
+
+                leaf src_ip {
+                    type inet:ip-address;
+                    description "Source IP";
+                }
+
+                leaf nas_ip {
+                    type inet:ip-address;
+                    description "NAS-IP";
+                }
+
+                leaf retransmit {
+                    type uint16 {
+                        range "1..10" {
+                            error-message "RADIUS server retransmit attempts must be 1..10";
+                        }
+                    }
+                    description "RADIUS server retransmit";
+                }
+
+                leaf statistics {
+                    type boolean;
+                }
+            }
+        }
+    }
+}

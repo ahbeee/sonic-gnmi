@@ -1,0 +1,24 @@
+module sonic-ip-show {
+    namespace "http://github.com/Azure/sonic-ip-show";
+    prefix sipshow;
+    yang-version 1.1;
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONiC yang for RPC based show ip commands.";
+
+    revision 2020-01-27 {
+        description
+            "Initial revision.";
+    }
+
+}

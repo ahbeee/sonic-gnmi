@@ -1,0 +1,2284 @@
+module: sonic-acl
+  +--rw sonic-acl
+     +--rw ACL_RULE
+     |  +--rw ACL_RULE_LIST* [ACL_TABLE_NAME RULE_NAME]
+     |     +--rw ACL_TABLE_NAME             -> /sonic-acl/ACL_TABLE/ACL_TABLE_LIST/ACL_TABLE_NAME
+     |     +--rw RULE_NAME                  string
+     |     +--rw PACKET_ACTION?             stypes:packet_action
+     |     +--rw MIRROR_INGRESS_ACTION?     -> /sms:sonic-mirror-session/MIRROR_SESSION/MIRROR_SESSION_LIST/name
+     |     +--rw MIRROR_EGRESS_ACTION?      -> /sms:sonic-mirror-session/MIRROR_SESSION/MIRROR_SESSION_LIST/name
+     |     +--rw IP_TYPE?                   stypes:ip_type
+     |     +--rw PRIORITY                   uint32
+     |     +--rw (src_dst_address)?
+     |     |  +--:(l2_src_dst_address)
+     |     |  |  +--rw SRC_MAC?             stypes:mac-addr-and-mask
+     |     |  |  +--rw DST_MAC?             stypes:mac-addr-and-mask
+     |     |  +--:(ip4_prefix)
+     |     |  |  +--rw SRC_IP?              inet:ipv4-prefix
+     |     |  |  +--rw DST_IP?              inet:ipv4-prefix
+     |     |  +--:(ip6_prefix)
+     |     |     +--rw SRC_IPV6?            inet:ipv6-prefix
+     |     |     +--rw DST_IPV6?            inet:ipv6-prefix
+     |     +--rw IN_PORTS?                  string
+     |     +--rw OUT_PORTS?                 string
+     |     +--rw (src_port)?
+     |     |  +--:(l4_src_port)
+     |     |  |  +--rw L4_SRC_PORT?         uint16
+     |     |  +--:(l4_src_port_range)
+     |     |     +--rw L4_SRC_PORT_RANGE?   string
+     |     +--rw (dst_port)?
+     |     |  +--:(l4_dst_port)
+     |     |  |  +--rw L4_DST_PORT?         uint16
+     |     |  +--:(l4_dst_port_range)
+     |     |     +--rw L4_DST_PORT_RANGE?   string
+     |     +--rw ETHER_TYPE?                string
+     |     +--rw IP_PROTOCOL?               uint8
+     |     +--rw TCP_FLAGS?                 string
+     |     +--rw DSCP?                      uint8
+     |     +--rw TC?                        uint8
+     |     +--rw (icmp)?
+     |     |  +--:(icmp4)
+     |     |  |  +--rw ICMP_TYPE?           uint8
+     |     |  |  +--rw ICMP_CODE?           uint8
+     |     |  +--:(icmp6)
+     |     |     +--rw ICMPV6_TYPE?         uint8
+     |     |     +--rw ICMPV6_CODE?         uint8
+     |     +--rw INNER_ETHER_TYPE?          string
+     |     +--rw INNER_IP_PROTOCOL?         uint8
+     |     +--rw INNER_L4_SRC_PORT?         uint16
+     |     +--rw INNER_L4_DST_PORT?         uint16
+     |     +--rw VLAN_ID?                   uint16
+     |     +--rw PCP?                       string
+     |     +--rw DEI?                       uint8
+     |     +--rw BTH_OPCODE?                string
+     |     +--rw AETH_SYNDROME?             string
+     +--rw ACL_TABLE_TYPE
+     |  +--rw ACL_TABLE_TYPE_LIST* [ACL_TABLE_TYPE_NAME]
+     |     +--rw ACL_TABLE_TYPE_NAME    string
+     |     +--rw MATCHES*               string
+     |     +--rw ACTIONS*               string
+     |     +--rw BIND_POINTS*           enumeration
+     +--rw ACL_TABLE
+        +--rw ACL_TABLE_LIST* [ACL_TABLE_NAME]
+           +--rw ACL_TABLE_NAME    string
+           +--rw policy_desc?      string
+           +--rw type              union
+           +--rw stage?            string
+           +--rw services*         string
+           +--rw ports*            union
+
+module: sonic-auto_techsupport
+  +--rw sonic-auto_techsupport
+     +--rw AUTO_TECHSUPPORT
+     |  +--rw GLOBAL
+     |     +--rw state?                     stypes:admin_mode
+     |     +--rw rate_limit_interval?       uint16
+     |     +--rw max_techsupport_limit?     decimal-repr
+     |     +--rw max_core_limit?            decimal-repr
+     |     +--rw available_mem_threshold?   decimal-repr
+     |     +--rw min_available_mem?         uint32
+     |     +--rw since?                     string
+     +--rw AUTO_TECHSUPPORT_FEATURE
+        +--rw AUTO_TECHSUPPORT_FEATURE_LIST* [feature_name]
+           +--rw feature_name               string
+           +--rw state?                     stypes:admin_mode
+           +--rw available_mem_threshold?   decimal-repr
+           +--rw rate_limit_interval?       uint16
+
+module: sonic-bgp-allowed-prefix
+  +--rw sonic-bgp-allowed-prefix
+     +--rw BGP_ALLOWED_PREFIXES
+        +--rw BGP_ALLOWED_PREFIXES_COM_LIST* [deployment id community]
+        |  +--rw deployment        string
+        |  +--rw id                uint32
+        |  +--rw community         string
+        |  +--rw default_action?   rpolsets:routing-policy-action-type
+        |  +--rw prefixes_v4*      inet:ipv4-prefix
+        |  +--rw prefixes_v6*      inet:ipv6-prefix
+        +--rw BGP_ALLOWED_PREFIXES_LIST* [deployment id]
+           +--rw deployment        string
+           +--rw id                uint32
+           +--rw default_action?   rpolsets:routing-policy-action-type
+           +--rw prefixes_v4*      inet:ipv4-prefix
+           +--rw prefixes_v6*      inet:ipv6-prefix
+
+module: sonic-bgp-bbr
+  +--rw sonic-bgp-bbr
+     +--rw BGP_BBR
+        +--rw all
+           +--rw status?   stypes:admin_mode
+
+module: sonic-bgp-device-global
+  +--rw sonic-bgp-device-global
+     +--rw BGP_DEVICE_GLOBAL
+        +--rw STATE
+           +--rw tsa_enabled?   boolean
+
+module: sonic-bgp-global
+  +--rw sonic-bgp-global
+     +--rw BGP_GLOBALS
+     |  +--rw BGP_GLOBALS_LIST* [vrf_name]
+     |     +--rw vrf_name                           union
+     |     +--rw router_id?                         inet:ipv4-address
+     |     +--rw local_asn?                         uint32
+     |     +--rw always_compare_med?                boolean
+     |     +--rw load_balance_mp_relax?             boolean
+     |     +--rw graceful_restart_enable?           boolean
+     |     +--rw gr_preserve_fw_state?              boolean
+     |     +--rw gr_restart_time?                   uint16
+     |     +--rw gr_stale_routes_time?              uint16
+     |     +--rw external_compare_router_id?        boolean
+     |     +--rw ignore_as_path_length?             boolean
+     |     +--rw log_nbr_state_changes?             boolean
+     |     +--rw rr_cluster_id?                     string
+     |     +--rw rr_allow_out_policy?               boolean
+     |     +--rw disable_ebgp_connected_rt_check?   boolean
+     |     +--rw fast_external_failover?            boolean
+     |     +--rw network_import_check?              boolean
+     |     +--rw graceful_shutdown?                 boolean
+     |     +--rw rr_clnt_to_clnt_reflection?        boolean
+     |     +--rw max_dynamic_neighbors?             uint16
+     |     +--rw read_quanta?                       uint8
+     |     +--rw write_quanta?                      uint8
+     |     +--rw coalesce_time?                     uint32
+     |     +--rw route_map_process_delay?           uint16
+     |     +--rw deterministic_med?                 boolean
+     |     +--rw med_confed?                        boolean
+     |     +--rw med_missing_as_worst?              boolean
+     |     +--rw compare_confed_as_path?            boolean
+     |     +--rw as_path_mp_as_set?                 boolean
+     |     +--rw default_ipv4_unicast?              boolean
+     |     +--rw default_local_preference?          uint32
+     |     +--rw default_show_hostname?             boolean
+     |     +--rw default_shutdown?                  boolean
+     |     +--rw default_subgroup_pkt_queue_max?    uint8
+     |     +--rw max_med_time?                      uint32
+     |     +--rw max_med_val?                       uint32
+     |     +--rw max_med_admin?                     boolean
+     |     +--rw max_med_admin_val?                 uint32
+     |     +--rw max_delay?                         uint16
+     |     +--rw establish_wait?                    uint16
+     |     +--rw confed_id?                         uint32
+     |     +--rw confed_peers*                      uint32
+     |     +--rw keepalive?                         uint16
+     |     +--rw holdtime?                          uint16
+     +--rw BGP_GLOBALS_AF
+     |  +--rw BGP_GLOBALS_AF_LIST* [vrf_name afi_safi]
+     |     +--rw vrf_name                                -> ../../../BGP_GLOBALS/BGP_GLOBALS_LIST/vrf_name
+     |     +--rw afi_safi                                string
+     |     +--rw max_ebgp_paths?                         uint16
+     |     +--rw max_ibgp_paths?                         uint16
+     |     +--rw import_vrf?                             union
+     |     +--rw import_vrf_route_map?                   -> /rmap:sonic-route-map/ROUTE_MAP_SET/ROUTE_MAP_SET_LIST/name
+     |     +--rw route_download_filter?                  -> /rmap:sonic-route-map/ROUTE_MAP_SET/ROUTE_MAP_SET_LIST/name
+     |     +--rw ebgp_route_distance?                    uint8
+     |     +--rw ibgp_route_distance?                    uint8
+     |     +--rw local_route_distance?                   uint8
+     |     +--rw ibgp_equal_cluster_length?              boolean
+     |     +--rw route_flap_dampen?                      boolean
+     |     +--rw route_flap_dampen_half_life?            uint8
+     |     +--rw route_flap_dampen_reuse_threshold?      uint16
+     |     +--rw route_flap_dampen_suppress_threshold?   uint16
+     |     +--rw route_flap_dampen_max_suppress?         uint8
+     +--rw BGP_GLOBALS_AF_AGGREGATE_ADDR
+     |  +--rw BGP_GLOBALS_AF_AGGREGATE_ADDR_LIST* [vrf_name afi_safi ip_prefix]
+     |     +--rw vrf_name        -> ../../../BGP_GLOBALS/BGP_GLOBALS_LIST/vrf_name
+     |     +--rw afi_safi        string
+     |     +--rw ip_prefix       inet:ip-prefix
+     |     +--rw as_set?         boolean
+     |     +--rw summary_only?   boolean
+     |     +--rw policy?         -> /rmap:sonic-route-map/ROUTE_MAP_SET/ROUTE_MAP_SET_LIST/name
+     +--rw BGP_GLOBALS_AF_NETWORK
+        +--rw BGP_GLOBALS_AF_NETWORK_LIST* [vrf_name afi_safi ip_prefix]
+           +--rw vrf_name     -> ../../../BGP_GLOBALS/BGP_GLOBALS_LIST/vrf_name
+           +--rw afi_safi     string
+           +--rw ip_prefix    inet:ip-prefix
+           +--rw policy?      -> /rmap:sonic-route-map/ROUTE_MAP_SET/ROUTE_MAP_SET_LIST/name
+           +--rw backdoor?    boolean
+
+module: sonic-bgp-internal-neighbor
+  +--rw sonic-bgp-internal-neighbor
+     +--rw BGP_INTERNAL_NEIGHBOR
+        +--rw BGP_INTERNAL_NEIGHBOR_LIST* [neighbor]
+           +--rw neighbor        inet:ip-address
+           +--rw asn?            uint32
+           +--rw holdtime?       uint16
+           +--rw keepalive?      uint16
+           +--rw local_addr      inet:ip-address
+           +--rw name?           string
+           +--rw nhopself?       uint8
+           +--rw rrclient?       uint8
+           +--rw admin_status?   stypes:admin_status
+
+module: sonic-bgp-monitor
+  +--rw sonic-bgp-monitor
+     +--rw BGP_MONITORS
+        +--rw BGP_MONITORS_LIST* [addr]
+           +--rw addr            inet:ip-address
+           +--rw asn?            uint32
+           +--rw holdtime?       uint16
+           +--rw keepalive?      uint16
+           +--rw local_addr?     inet:ip-address
+           +--rw name?           string
+           +--rw nhopself?       uint8
+           +--rw rrclient?       uint8
+           +--rw admin_status?   stypes:admin_status
+
+module: sonic-bgp-neighbor
+  +--rw sonic-bgp-neighbor
+     +--rw BGP_NEIGHBOR
+     |  +--rw BGP_NEIGHBOR_TEMPLATE_LIST* [neighbor]
+     |  |  +--rw neighbor        inet:ip-address
+     |  |  +--rw asn?            uint32
+     |  |  +--rw holdtime?       uint16
+     |  |  +--rw keepalive?      uint16
+     |  |  +--rw local_addr?     inet:ip-address
+     |  |  +--rw name?           string
+     |  |  +--rw nhopself?       uint8
+     |  |  +--rw rrclient?       uint8
+     |  |  +--rw admin_status?   stypes:admin_status
+     |  +--rw BGP_NEIGHBOR_LIST* [vrf_name neighbor]
+     |     +--rw vrf_name                              -> /bgpg:sonic-bgp-global/BGP_GLOBALS/BGP_GLOBALS_LIST/vrf_name
+     |     +--rw neighbor                              union
+     |     +--rw peer_group_name?                      -> /bgppg:sonic-bgp-peergroup/BGP_PEER_GROUP/BGP_PEER_GROUP_LIST[bgppg:vrf_name=current()/../vrf_name]/peer_group_name
+     |     +--rw local_asn?                            uint32
+     |     +--rw name?                                 string
+     |     +--rw asn?                                  uint32
+     |     +--rw peer_type?                            bgp_peer_type
+     |     +--rw ebgp_multihop?                        boolean
+     |     +--rw ebgp_multihop_ttl?                    uint8
+     |     +--rw auth_password?                        string
+     |     +--rw keepalive?                            uint16
+     |     +--rw holdtime?                             uint16
+     |     +--rw conn_retry?                           uint16
+     |     +--rw min_adv_interval?                     uint16
+     |     +--rw local_addr?                           union
+     |     +--rw passive_mode?                         boolean
+     |     +--rw capability_ext_nexthop?               boolean
+     |     +--rw disable_ebgp_connected_route_check?   boolean
+     |     +--rw enforce_first_as?                     boolean
+     |     +--rw solo_peer?                            boolean
+     |     +--rw ttl_security_hops?                    uint8
+     |     +--rw bfd?                                  boolean
+     |     +--rw bfd_check_ctrl_plane_failure?         boolean
+     |     +--rw capability_dynamic?                   boolean
+     |     +--rw dont_negotiate_capability?            boolean
+     |     +--rw enforce_multihop?                     boolean
+     |     +--rw override_capability?                  boolean
+     |     +--rw peer_port?                            uint16
+     |     +--rw shutdown_message?                     string
+     |     +--rw strict_capability_match?              boolean
+     |     +--rw admin_status?                         stypes:admin_status
+     |     +--rw local_as_no_prepend?                  boolean
+     |     +--rw local_as_replace_as?                  boolean
+     +--rw BGP_NEIGHBOR_AF
+        +--rw BGP_NEIGHBOR_AF_LIST* [vrf_name neighbor afi_safi]
+           +--rw vrf_name                        -> /bgpg:sonic-bgp-global/BGP_GLOBALS/BGP_GLOBALS_LIST/vrf_name
+           +--rw neighbor                        -> ../../../BGP_NEIGHBOR/BGP_NEIGHBOR_LIST[vrf_name=current()/../vrf_name]/neighbor
+           +--rw afi_safi                        string
+           +--rw admin_status?                   stypes:admin_status
+           +--rw send_default_route?             boolean
+           +--rw default_rmap?                   -> /rmap:sonic-route-map/ROUTE_MAP_SET/ROUTE_MAP_SET_LIST/name
+           +--rw max_prefix_limit?               uint32
+           +--rw max_prefix_warning_only?        boolean
+           +--rw max_prefix_warning_threshold?   uint8
+           +--rw max_prefix_restart_interval?    uint16
+           +--rw route_map_in*                   -> /rmap:sonic-route-map/ROUTE_MAP_SET/ROUTE_MAP_SET_LIST/name
+           +--rw route_map_out*                  -> /rmap:sonic-route-map/ROUTE_MAP_SET/ROUTE_MAP_SET_LIST/name
+           +--rw soft_reconfiguration_in?        boolean
+           +--rw unsuppress_map_name?            -> /rmap:sonic-route-map/ROUTE_MAP_SET/ROUTE_MAP_SET_LIST/name
+           +--rw rrclient?                       boolean
+           +--rw weight?                         uint16
+           +--rw as_override?                    boolean
+           +--rw send_community?                 bgp_community_type
+           +--rw tx_add_paths?                   bgp_tx_add_paths_type
+           +--rw unchanged_as_path?              boolean
+           +--rw unchanged_med?                  boolean
+           +--rw unchanged_nexthop?              boolean
+           +--rw filter_list_in?                 -> /rpolsets:sonic-routing-policy-sets/AS_PATH_SET/AS_PATH_SET_LIST/name
+           +--rw filter_list_out?                -> /rpolsets:sonic-routing-policy-sets/AS_PATH_SET/AS_PATH_SET_LIST/name
+           +--rw nhself?                         boolean
+           +--rw nexthop_self_force?             boolean
+           +--rw prefix_list_in?                 -> /rpolsets:sonic-routing-policy-sets/PREFIX_SET/PREFIX_SET_LIST/name
+           +--rw prefix_list_out?                -> /rpolsets:sonic-routing-policy-sets/PREFIX_SET/PREFIX_SET_LIST/name
+           +--rw remove_private_as_enabled?      boolean
+           +--rw replace_private_as?             boolean
+           +--rw remove_private_as_all?          boolean
+           +--rw allow_as_in?                    boolean
+           +--rw allow_as_count?                 uint8
+           +--rw allow_as_origin?                boolean
+           +--rw cap_orf?                        sonic_bgp_orf
+           +--rw route_server_client?            boolean
+
+module: sonic-bgp-peergroup
+  +--rw sonic-bgp-peergroup
+     +--rw BGP_PEER_GROUP
+     |  +--rw BGP_PEER_GROUP_LIST* [vrf_name peer_group_name]
+     |     +--rw vrf_name                              -> /bgpg:sonic-bgp-global/BGP_GLOBALS/BGP_GLOBALS_LIST/vrf_name
+     |     +--rw peer_group_name                       string
+     |     +--rw local_asn?                            uint32
+     |     +--rw name?                                 string
+     |     +--rw asn?                                  uint32
+     |     +--rw peer_type?                            bgp_peer_type
+     |     +--rw ebgp_multihop?                        boolean
+     |     +--rw ebgp_multihop_ttl?                    uint8
+     |     +--rw auth_password?                        string
+     |     +--rw keepalive?                            uint16
+     |     +--rw holdtime?                             uint16
+     |     +--rw conn_retry?                           uint16
+     |     +--rw min_adv_interval?                     uint16
+     |     +--rw local_addr?                           union
+     |     +--rw passive_mode?                         boolean
+     |     +--rw capability_ext_nexthop?               boolean
+     |     +--rw disable_ebgp_connected_route_check?   boolean
+     |     +--rw enforce_first_as?                     boolean
+     |     +--rw solo_peer?                            boolean
+     |     +--rw ttl_security_hops?                    uint8
+     |     +--rw bfd?                                  boolean
+     |     +--rw bfd_check_ctrl_plane_failure?         boolean
+     |     +--rw capability_dynamic?                   boolean
+     |     +--rw dont_negotiate_capability?            boolean
+     |     +--rw enforce_multihop?                     boolean
+     |     +--rw override_capability?                  boolean
+     |     +--rw peer_port?                            uint16
+     |     +--rw shutdown_message?                     string
+     |     +--rw strict_capability_match?              boolean
+     |     +--rw admin_status?                         stypes:admin_status
+     |     +--rw local_as_no_prepend?                  boolean
+     |     +--rw local_as_replace_as?                  boolean
+     +--rw BGP_PEER_GROUP_AF
+     |  +--rw BGP_PEER_GROUP_AF_LIST* [vrf_name peer_group_name afi_safi]
+     |     +--rw vrf_name                        -> /bgpg:sonic-bgp-global/BGP_GLOBALS/BGP_GLOBALS_LIST/vrf_name
+     |     +--rw peer_group_name                 -> ../../../BGP_PEER_GROUP/BGP_PEER_GROUP_LIST[vrf_name=current()/../vrf_name]/peer_group_name
+     |     +--rw afi_safi                        string
+     |     +--rw admin_status?                   stypes:admin_status
+     |     +--rw send_default_route?             boolean
+     |     +--rw default_rmap?                   -> /rmap:sonic-route-map/ROUTE_MAP_SET/ROUTE_MAP_SET_LIST/name
+     |     +--rw max_prefix_limit?               uint32
+     |     +--rw max_prefix_warning_only?        boolean
+     |     +--rw max_prefix_warning_threshold?   uint8
+     |     +--rw max_prefix_restart_interval?    uint16
+     |     +--rw route_map_in*                   -> /rmap:sonic-route-map/ROUTE_MAP_SET/ROUTE_MAP_SET_LIST/name
+     |     +--rw route_map_out*                  -> /rmap:sonic-route-map/ROUTE_MAP_SET/ROUTE_MAP_SET_LIST/name
+     |     +--rw soft_reconfiguration_in?        boolean
+     |     +--rw unsuppress_map_name?            -> /rmap:sonic-route-map/ROUTE_MAP_SET/ROUTE_MAP_SET_LIST/name
+     |     +--rw rrclient?                       boolean
+     |     +--rw weight?                         uint16
+     |     +--rw as_override?                    boolean
+     |     +--rw send_community?                 bgp_community_type
+     |     +--rw tx_add_paths?                   bgp_tx_add_paths_type
+     |     +--rw unchanged_as_path?              boolean
+     |     +--rw unchanged_med?                  boolean
+     |     +--rw unchanged_nexthop?              boolean
+     |     +--rw filter_list_in?                 -> /rpolsets:sonic-routing-policy-sets/AS_PATH_SET/AS_PATH_SET_LIST/name
+     |     +--rw filter_list_out?                -> /rpolsets:sonic-routing-policy-sets/AS_PATH_SET/AS_PATH_SET_LIST/name
+     |     +--rw nhself?                         boolean
+     |     +--rw nexthop_self_force?             boolean
+     |     +--rw prefix_list_in?                 -> /rpolsets:sonic-routing-policy-sets/PREFIX_SET/PREFIX_SET_LIST/name
+     |     +--rw prefix_list_out?                -> /rpolsets:sonic-routing-policy-sets/PREFIX_SET/PREFIX_SET_LIST/name
+     |     +--rw remove_private_as_enabled?      boolean
+     |     +--rw replace_private_as?             boolean
+     |     +--rw remove_private_as_all?          boolean
+     |     +--rw allow_as_in?                    boolean
+     |     +--rw allow_as_count?                 uint8
+     |     +--rw allow_as_origin?                boolean
+     |     +--rw cap_orf?                        sonic_bgp_orf
+     |     +--rw route_server_client?            boolean
+     +--rw BGP_GLOBALS_LISTEN_PREFIX
+        +--rw BGP_GLOBALS_LISTEN_PREFIX_LIST* [vrf_name ip_prefix]
+           +--rw vrf_name      -> /bgpg:sonic-bgp-global/BGP_GLOBALS/BGP_GLOBALS_LIST/vrf_name
+           +--rw ip_prefix     inet:ip-prefix
+           +--rw peer_group?   -> ../../../BGP_PEER_GROUP/BGP_PEER_GROUP_LIST[vrf_name=current()/../vrf_name]/peer_group_name
+
+module: sonic-bgp-peerrange
+  +--rw sonic-bgp-peerrange
+     +--rw BGP_PEER_RANGE
+        +--rw BGP_PEER_RANGE_LIST* [peer_range_name]
+           +--rw peer_range_name    string
+           +--rw name?              string
+           +--rw src_address?       inet:ip-address
+           +--rw peer_asn?          uint32
+           +--rw ip_range*          stypes:sonic-ip-prefix
+
+module: sonic-bgp-sentinel
+  +--rw sonic-bgp-sentinel
+     +--rw BGP_SENTINELS
+        +--rw BGP_SENTINELS_LIST* [sentinel_name]
+           +--rw sentinel_name    string
+           +--rw name?            string
+           +--rw src_address?     inet:ip-address
+           +--rw ip_range*        stypes:sonic-ip-prefix
+
+module: sonic-bgp-voq-chassis-neighbor
+  +--rw sonic-bgp-voq-chassis-neighbor
+     +--rw BGP_VOQ_CHASSIS_NEIGHBOR
+        +--rw BGP_VOQ_CHASSIS_NEIGHBOR_LIST* [neighbor]
+           +--rw neighbor        inet:ip-address
+           +--rw asn?            uint32
+           +--rw holdtime?       uint16
+           +--rw keepalive?      uint16
+           +--rw local_addr      inet:ip-address
+           +--rw name?           string
+           +--rw nhopself?       uint8
+           +--rw rrclient?       uint8
+           +--rw admin_status?   stypes:admin_status
+
+module: sonic-breakout_cfg
+  +--rw sonic-breakout_cfg
+     +--rw BREAKOUT_CFG
+        +--rw BREAKOUT_CFG_LIST* [port]
+           +--rw port           string
+           +--rw brkout_mode?   string
+
+module: sonic-buffer-pg
+  +--rw sonic-buffer-pg
+     +--rw BUFFER_PG
+        +--rw BUFFER_PG_LIST* [port pg_num]
+           +--rw port       -> /prt:sonic-port/PORT/PORT_LIST/name
+           +--rw pg_num     string
+           +--rw profile?   union
+
+module: sonic-buffer-pool
+  +--rw sonic-buffer-pool
+     +--rw BUFFER_POOL
+        +--rw BUFFER_POOL_LIST* [name]
+           +--rw name    string
+           +--rw type    enumeration
+           +--rw mode    enumeration
+           +--rw size?   uint64
+           +--rw xoff?   uint64
+
+module: sonic-buffer-port-egress-profile-list
+  +--rw sonic-buffer-port-egress-profile-list
+     +--rw BUFFER_PORT_EGRESS_PROFILE_LIST
+        +--rw BUFFER_PORT_EGRESS_PROFILE_LIST_LIST* [port]
+           +--rw port            -> /prt:sonic-port/PORT/PORT_LIST/name
+           +--rw profile_list*   -> /bpf:sonic-buffer-profile/BUFFER_PROFILE/BUFFER_PROFILE_LIST/name
+
+module: sonic-buffer-port-ingress-profile-list
+  +--rw sonic-buffer-port-ingress-profile-list
+     +--rw BUFFER_PORT_INGRESS_PROFILE_LIST
+        +--rw BUFFER_PORT_INGRESS_PROFILE_LIST_LIST* [port]
+           +--rw port            -> /prt:sonic-port/PORT/PORT_LIST/name
+           +--rw profile_list*   -> /bpf:sonic-buffer-profile/BUFFER_PROFILE/BUFFER_PROFILE_LIST/name
+
+module: sonic-buffer-profile
+  +--rw sonic-buffer-profile
+     +--rw BUFFER_PROFILE
+        +--rw BUFFER_PROFILE_LIST* [name]
+           +--rw name             string
+           +--rw static_th?       uint64
+           +--rw dynamic_th?      int32
+           +--rw size             uint64
+           +--rw pool             -> /bpl:sonic-buffer-pool/BUFFER_POOL/BUFFER_POOL_LIST/name
+           +--rw xon_offset?      uint64
+           +--rw xon?             uint64
+           +--rw xoff?            uint64
+           +--rw headroom_type?   enumeration
+
+module: sonic-buffer-queue
+  +--rw sonic-buffer-queue
+     +--rw BUFFER_QUEUE
+        +--rw BUFFER_QUEUE_LIST* [port qindex]
+           +--rw port       -> /prt:sonic-port/PORT/PORT_LIST/name
+           +--rw qindex     string
+           +--rw profile?   -> /bpf:sonic-buffer-profile/BUFFER_PROFILE/BUFFER_PROFILE_LIST/name
+
+module: sonic-cable-length
+  +--rw sonic-cable-length
+     +--rw CABLE_LENGTH
+        +--rw CABLE_LENGTH_LIST* [name]
+           +--rw name            string
+           +--rw CABLE_LENGTH* [port]
+              +--rw port      -> /port:sonic-port/PORT/PORT_LIST/name
+              +--rw length?   string
+
+module: sonic-chassis-module
+  +--rw sonic-chassis-module
+     +--rw CHASSIS_MODULE
+        +--rw CHASSIS_MODULE_LIST* [name]
+           +--rw name            string
+           +--rw admin_status?   stypes:admin_status
+
+module: sonic-console
+  +--rw sonic-console
+     +--rw CONSOLE_PORT
+     |  +--rw CONSOLE_PORT_LIST* [name]
+     |     +--rw name             uint16
+     |     +--rw baud_rate?       uint32
+     |     +--rw flow_control?    console-flow-control
+     |     +--rw remote_device?   stypes:hostname
+     +--rw CONSOLE_SWITCH
+        +--rw console_mgmt
+           +--rw enabled?   console-mgmt-enabled
+
+module: sonic-copp
+  +--rw sonic-copp
+     +--rw COPP_GROUP
+     |  +--rw COPP_GROUP_LIST* [name]
+     |     +--rw name             string
+     |     +--rw queue?           uint32
+     |     +--rw trap_priority?   uint32
+     |     +--rw trap_action      stypes:policer_packet_action
+     |     +--rw meter_type       stypes:meter_type
+     |     +--rw mode             enumeration
+     |     +--rw color?           stypes:policer_color_source
+     |     +--rw cir?             uint64
+     |     +--rw cbs?             uint64
+     |     +--rw pir?             uint64
+     |     +--rw pbs?             uint64
+     |     +--rw green_action?    stypes:policer_packet_action
+     |     +--rw yellow_action?   stypes:policer_packet_action
+     |     +--rw red_action?      stypes:policer_packet_action
+     +--rw COPP_TRAP
+        +--rw COPP_TRAP_LIST* [name]
+           +--rw name              string
+           +--rw trap_ids          string
+           +--rw trap_group?       -> /sonic-copp/COPP_GROUP/COPP_GROUP_LIST/name
+           +--rw always_enabled?   boolean
+
+  rpcs:
+    +---x get-match-protocols
+       +--ro output
+          +--ro Match_protocols* [Protocol]
+             +--ro Protocol    string
+
+module: sonic-crm
+  +--rw sonic-crm
+     +--rw CRM
+        +--rw Config
+           +--rw acl_counter_threshold_type?                   stypes:crm_threshold_type
+           +--rw acl_counter_high_threshold?                   threshold
+           +--rw acl_counter_low_threshold?                    threshold
+           +--rw acl_group_threshold_type?                     stypes:crm_threshold_type
+           +--rw acl_group_high_threshold?                     threshold
+           +--rw acl_group_low_threshold?                      threshold
+           +--rw acl_entry_threshold_type?                     stypes:crm_threshold_type
+           +--rw acl_entry_high_threshold?                     threshold
+           +--rw acl_entry_low_threshold?                      threshold
+           +--rw acl_table_threshold_type?                     stypes:crm_threshold_type
+           +--rw acl_table_high_threshold?                     threshold
+           +--rw acl_table_low_threshold?                      threshold
+           +--rw fdb_entry_threshold_type?                     stypes:crm_threshold_type
+           +--rw fdb_entry_high_threshold?                     threshold
+           +--rw fdb_entry_low_threshold?                      threshold
+           +--rw ipv4_neighbor_threshold_type?                 stypes:crm_threshold_type
+           +--rw ipv4_neighbor_high_threshold?                 threshold
+           +--rw ipv4_neighbor_low_threshold?                  threshold
+           +--rw ipv4_nexthop_threshold_type?                  stypes:crm_threshold_type
+           +--rw ipv4_nexthop_high_threshold?                  threshold
+           +--rw ipv4_nexthop_low_threshold?                   threshold
+           +--rw ipv4_route_threshold_type?                    stypes:crm_threshold_type
+           +--rw ipv4_route_high_threshold?                    threshold
+           +--rw ipv4_route_low_threshold?                     threshold
+           +--rw ipv6_neighbor_threshold_type?                 stypes:crm_threshold_type
+           +--rw ipv6_neighbor_high_threshold?                 threshold
+           +--rw ipv6_neighbor_low_threshold?                  threshold
+           +--rw ipv6_nexthop_threshold_type?                  stypes:crm_threshold_type
+           +--rw ipv6_nexthop_high_threshold?                  threshold
+           +--rw ipv6_nexthop_low_threshold?                   threshold
+           +--rw ipv6_route_threshold_type?                    stypes:crm_threshold_type
+           +--rw ipv6_route_high_threshold?                    threshold
+           +--rw ipv6_route_low_threshold?                     threshold
+           +--rw nexthop_group_threshold_type?                 stypes:crm_threshold_type
+           +--rw nexthop_group_high_threshold?                 threshold
+           +--rw nexthop_group_low_threshold?                  threshold
+           +--rw nexthop_group_member_threshold_type?          stypes:crm_threshold_type
+           +--rw nexthop_group_member_high_threshold?          threshold
+           +--rw nexthop_group_member_low_threshold?           threshold
+           +--rw polling_interval?                             threshold
+           +--rw dnat_entry_threshold_type?                    stypes:crm_threshold_type
+           +--rw dnat_entry_high_threshold?                    threshold
+           +--rw dnat_entry_low_threshold?                     threshold
+           +--rw snat_entry_threshold_type?                    stypes:crm_threshold_type
+           +--rw snat_entry_high_threshold?                    threshold
+           +--rw snat_entry_low_threshold?                     threshold
+           +--rw ipmc_entry_threshold_type?                    stypes:crm_threshold_type
+           +--rw ipmc_entry_high_threshold?                    threshold
+           +--rw ipmc_entry_low_threshold?                     threshold
+           +--rw mpls_inseg_threshold_type?                    stypes:crm_threshold_type
+           +--rw mpls_inseg_high_threshold?                    threshold
+           +--rw mpls_inseg_low_threshold?                     threshold
+           +--rw mpls_nexthop_threshold_type?                  stypes:crm_threshold_type
+           +--rw mpls_nexthop_high_threshold?                  threshold
+           +--rw mpls_nexthop_low_threshold?                   threshold
+           +--rw srv6_my_sid_entry_threshold_type?             stypes:crm_threshold_type
+           +--rw srv6_my_sid_entry_high_threshold?             threshold
+           +--rw srv6_my_sid_entry_low_threshold?              threshold
+           +--rw srv6_nexthop_threshold_type?                  stypes:crm_threshold_type
+           +--rw srv6_nexthop_high_threshold?                  threshold
+           +--rw srv6_nexthop_low_threshold?                   threshold
+           +--rw dash_vnet_threshold_type?                     stypes:crm_threshold_type
+           +--rw dash_vnet_high_threshold?                     threshold
+           +--rw dash_vnet_low_threshold?                      threshold
+           +--rw dash_eni_threshold_type?                      stypes:crm_threshold_type
+           +--rw dash_eni_high_threshold?                      threshold
+           +--rw dash_eni_low_threshold?                       threshold
+           +--rw dash_eni_ether_address_map_threshold_type?    stypes:crm_threshold_type
+           +--rw dash_eni_ether_address_map_high_threshold?    threshold
+           +--rw dash_eni_ether_address_map_low_threshold?     threshold
+           +--rw dash_ipv4_inbound_routing_threshold_type?     stypes:crm_threshold_type
+           +--rw dash_ipv4_inbound_routing_high_threshold?     threshold
+           +--rw dash_ipv4_inbound_routing_low_threshold?      threshold
+           +--rw dash_ipv6_inbound_routing_threshold_type?     stypes:crm_threshold_type
+           +--rw dash_ipv6_inbound_routing_high_threshold?     threshold
+           +--rw dash_ipv6_inbound_routing_low_threshold?      threshold
+           +--rw dash_ipv4_outbound_routing_threshold_type?    stypes:crm_threshold_type
+           +--rw dash_ipv4_outbound_routing_high_threshold?    threshold
+           +--rw dash_ipv4_outbound_routing_low_threshold?     threshold
+           +--rw dash_ipv6_outbound_routing_threshold_type?    stypes:crm_threshold_type
+           +--rw dash_ipv6_outbound_routing_high_threshold?    threshold
+           +--rw dash_ipv6_outbound_routing_low_threshold?     threshold
+           +--rw dash_ipv4_pa_validation_threshold_type?       stypes:crm_threshold_type
+           +--rw dash_ipv4_pa_validation_high_threshold?       threshold
+           +--rw dash_ipv4_pa_validation_low_threshold?        threshold
+           +--rw dash_ipv6_pa_validation_threshold_type?       stypes:crm_threshold_type
+           +--rw dash_ipv6_pa_validation_high_threshold?       threshold
+           +--rw dash_ipv6_pa_validation_low_threshold?        threshold
+           +--rw dash_ipv4_outbound_ca_to_pa_threshold_type?   stypes:crm_threshold_type
+           +--rw dash_ipv4_outbound_ca_to_pa_high_threshold?   threshold
+           +--rw dash_ipv4_outbound_ca_to_pa_low_threshold?    threshold
+           +--rw dash_ipv6_outbound_ca_to_pa_threshold_type?   stypes:crm_threshold_type
+           +--rw dash_ipv6_outbound_ca_to_pa_high_threshold?   threshold
+           +--rw dash_ipv6_outbound_ca_to_pa_low_threshold?    threshold
+           +--rw dash_ipv4_acl_group_threshold_type?           stypes:crm_threshold_type
+           +--rw dash_ipv4_acl_group_high_threshold?           threshold
+           +--rw dash_ipv4_acl_group_low_threshold?            threshold
+           +--rw dash_ipv6_acl_group_threshold_type?           stypes:crm_threshold_type
+           +--rw dash_ipv6_acl_group_high_threshold?           threshold
+           +--rw dash_ipv6_acl_group_low_threshold?            threshold
+           +--rw dash_ipv4_acl_rule_threshold_type?            stypes:crm_threshold_type
+           +--rw dash_ipv4_acl_rule_high_threshold?            threshold
+           +--rw dash_ipv4_acl_rule_low_threshold?             threshold
+           +--rw dash_ipv6_acl_rule_threshold_type?            stypes:crm_threshold_type
+           +--rw dash_ipv6_acl_rule_high_threshold?            threshold
+           +--rw dash_ipv6_acl_rule_low_threshold?             threshold
+
+module: sonic-dash
+  +--rw sonic-dash
+     +--rw DASH_VNET
+     |  +--rw DASH_VNET_LIST* [name]
+     |     +--rw name              string
+     |     +--rw vni?              uint32
+     |     +--rw guid?             string
+     |     +--rw address_spaces*   stypes:sonic-ip-prefix
+     +--rw DASH_QOS
+     |  +--rw DASH_QOS_LIST* [name]
+     |     +--rw name     string
+     |     +--rw bw?      uint64
+     |     +--rw cps?     uint64
+     |     +--rw flows?   uint64
+     +--rw DASH_ENI
+     |  +--rw DASH_ENI_LIST* [name]
+     |     +--rw name           string
+     |     +--rw eni_id?        string
+     |     +--rw mac_address?   yang:mac-address
+     |     +--rw qos?           -> /sonic-dash/DASH_QOS/DASH_QOS_LIST/name
+     |     +--rw vnet?          -> /sonic-dash/DASH_VNET/DASH_VNET_LIST/name
+     +--rw DASH_ACL_IN
+     |  +--rw DASH_ACL_IN_LIST* [eni stage]
+     |     +--rw eni             -> /sonic-dash/DASH_ENI/DASH_ENI_LIST/name
+     |     +--rw stage           uint8
+     |     +--rw acl_group_id?   -> /sonic-dash/DASH_ACL_GROUP/DASH_ACL_GROUP_LIST/name
+     +--rw DASH_ACL_OUT
+     |  +--rw DASH_ACL_OUT_LIST* [eni stage]
+     |     +--rw eni             -> /sonic-dash/DASH_ENI/DASH_ENI_LIST/name
+     |     +--rw stage           uint8
+     |     +--rw acl_group_id?   -> /sonic-dash/DASH_ACL_GROUP/DASH_ACL_GROUP_LIST/name
+     +--rw DASH_ACL_GROUP
+     |  +--rw DASH_ACL_GROUP_LIST* [name]
+     |     +--rw name          string
+     |     +--rw ip_version?   string
+     |     +--rw guid?         string
+     +--rw DASH_ACL_RULE
+     |  +--rw DASH_ACL_RULE_LIST* [acl_group_id name]
+     |     +--rw acl_group_id    -> /sonic-dash/DASH_ACL_GROUP/DASH_ACL_GROUP_LIST/name
+     |     +--rw name            string
+     |     +--rw priority?       uint32
+     |     +--rw action?         string
+     |     +--rw terminating?    boolean
+     |     +--rw ip_protocol*    stypes:ip-protocol-type
+     |     +--rw src_addr*       stypes:sonic-ip-prefix
+     |     +--rw dst_addr*       stypes:sonic-ip-prefix
+     |     +--rw src_port*       string
+     |     +--rw dst_port*       string
+     +--rw DASH_APPLIANCE
+     |  +--rw DASH_APPLIANCE_LIST* [name]
+     |     +--rw name    string
+     |     +--rw sip?    inet:ip-address
+     |     +--rw vni?    uint32
+     +--rw DASH_ROUTING_TYPE
+     |  +--rw DASH_ROUTING_TYPE_LIST* [name]
+     |     +--rw name           string
+     |     +--rw action_name?   string
+     |     +--rw action_type?   string
+     |     +--rw encap_type?    string
+     |     +--rw vni?           uint32
+     +--rw DASH_ROUTE_TABLE
+     |  +--rw DASH_ROUTE_TABLE_LIST* [eni prefix]
+     |     +--rw eni             -> /sonic-dash/DASH_ENI/DASH_ENI_LIST/name
+     |     +--rw prefix          stypes:sonic-ip-prefix
+     |     +--rw action_type?    -> /sonic-dash/DASH_ROUTING_TYPE/DASH_ROUTING_TYPE_LIST/name
+     |     +--rw vnet?           -> /sonic-dash/DASH_VNET/DASH_VNET_LIST/name
+     |     +--rw appliance?      -> /sonic-dash/DASH_APPLIANCE/DASH_APPLIANCE_LIST/name
+     |     +--rw overlay_ip?     inet:ip-address
+     |     +--rw overlay_sip?    inet:ip-address
+     |     +--rw overlay_dip?    inet:ip-address
+     |     +--rw underlay_sip?   inet:ip-address
+     |     +--rw underlay_dip?   inet:ip-address
+     +--rw DASH_VNET_MAPPING_TABLE
+        +--rw DASH_VNET_MAPPING_TABLE_LIST* [vnet ip_addr]
+           +--rw vnet            -> /sonic-dash/DASH_VNET/DASH_VNET_LIST/name
+           +--rw ip_addr         inet:ip-address
+           +--rw routing_type?   -> /sonic-dash/DASH_ROUTING_TYPE/DASH_ROUTING_TYPE_LIST/name
+           +--rw underlay_ip?    inet:ip-address
+           +--rw mac_address?    yang:mac-address
+           +--rw use_dst_vni?    boolean
+
+module: sonic-default-lossless-buffer-parameter
+  +--rw sonic-default-lossless-buffer-parameter
+     +--rw DEFAULT_LOSSLESS_BUFFER_PARAMETER
+        +--rw DEFAULT_LOSSLESS_BUFFER_PARAMETER_LIST* [name]
+           +--rw name                    string
+           +--rw default_dynamic_th      int8
+           +--rw over_subscribe_ratio?   uint16
+
+module: sonic-device_metadata
+  +--rw sonic-device_metadata
+     +--rw DEVICE_METADATA
+        +--rw localhost
+           +--rw hwsku?                           stypes:hwsku
+           +--rw default_bgp_status?              enumeration
+           +--rw docker_routing_config_mode?      string
+           +--rw hostname?                        stypes:hostname
+           +--rw platform?                        string
+           +--rw mac?                             yang:mac-address
+           +--rw default_pfcwd_status?            enumeration
+           +--rw bgp_asn?                         inet:as-number
+           +--rw deployment_id?                   uint32
+           +--rw type?                            string
+           +--rw buffer_model?                    string
+           +--rw frr_mgmt_framework_config?       boolean
+           +--rw synchronous_mode?                enumeration
+           +--rw yang_config_validation?          stypes:mode-status
+           +--rw cloudtype?                       string
+           +--rw region?                          string
+           +--rw sub_role?                        string
+           +--rw downstream_subrole?              string
+           +--rw resource_type?                   string
+           +--rw cluster?                         string
+           +--rw subtype?                         string
+           +--rw peer_switch?                     stypes:hostname
+           +--rw storage_device?                  boolean
+           +--rw asic_name?                       string
+           +--rw switch_id?                       uint16
+           +--rw switch_type?                     string
+           +--rw max_cores?                       uint8
+           +--rw dhcp_server?                     stypes:admin_mode
+           +--rw bgp_adv_lo_prefix_as_128?        boolean
+           +--rw rack_mgmt_map?                   string
+           +--rw timezone?                        stypes:timezone-name-type
+           +--rw create_only_config_db_buffers?   boolean
+           +--rw switch_switching_mode?           enumeration
+           +--rw dcbx_mode?                       enumeration
+           +--rw suppress-fib-pending?            enumeration
+
+module: sonic-device_neighbor
+  +--rw sonic-device_neighbor
+     +--rw DEVICE_NEIGHBOR
+        +--rw DEVICE_NEIGHBOR_LIST* [peer_name]
+           +--rw peer_name     string
+           +--rw name?         string
+           +--rw mgmt_addr?    inet:ip-address
+           +--rw local_port?   -> /port:sonic-port/PORT/PORT_LIST/name
+           +--rw port?         string
+           +--rw type?         string
+
+module: sonic-device_neighbor_metadata
+  +--rw sonic-device_neighbor_metadata
+     +--rw DEVICE_NEIGHBOR_METADATA
+        +--rw DEVICE_NEIGHBOR_METADATA_LIST* [name]
+           +--rw name             string
+           +--rw cluster?         string
+           +--rw hwsku?           stypes:hwsku
+           +--rw lo_addr?         union
+           +--rw lo_addr_v6?      union
+           +--rw mgmt_addr?       union
+           +--rw mgmt_addr_v6?    union
+           +--rw type?            string
+           +--rw deployment_id?   uint32
+
+module: sonic-dhcp-server-ipv4
+  +--rw sonic-dhcp-server-ipv4
+     +--rw DHCP_SERVER_IPV4
+     |  +--rw DHCP_SERVER_IPV4_LIST* [name]
+     |     +--rw name                  string
+     |     +--rw gateway               inet:ipv4-address
+     |     +--rw lease_time            uint32
+     |     +--rw mode                  enumeration
+     |     +--rw netmask               inet:ipv4-address-no-zone
+     |     +--rw customized_options*   -> /sonic-dhcp-server-ipv4/DHCP_SERVER_IPV4_CUSTOMIZED_OPTIONS/DHCP_SERVER_IPV4_CUSTOMIZED_OPTIONS_LIST/name
+     |     +--rw state                 stypes:admin_mode
+     +--rw DHCP_SERVER_IPV4_CUSTOMIZED_OPTIONS
+     |  +--rw DHCP_SERVER_IPV4_CUSTOMIZED_OPTIONS_LIST* [name]
+     |     +--rw name     string
+     |     +--rw id       uint8
+     |     +--rw type?    enumeration
+     |     +--rw value    union
+     +--rw DHCP_SERVER_IPV4_RANGE
+     |  +--rw DHCP_SERVER_IPV4_RANGE_LIST* [name]
+     |     +--rw name     string
+     |     +--rw range*   inet:ipv4-address
+     +--rw DHCP_SERVER_IPV4_PORT
+        +--rw DHCP_SERVER_IPV4_PORT_LIST* [name port]
+           +--rw name      -> /sonic-dhcp-server-ipv4/DHCP_SERVER_IPV4/DHCP_SERVER_IPV4_LIST/name
+           +--rw port      union
+           +--rw ips*      inet:ipv4-address
+           +--rw ranges*   -> /sonic-dhcp-server-ipv4/DHCP_SERVER_IPV4_RANGE/DHCP_SERVER_IPV4_RANGE_LIST/name
+
+module: sonic-dhcp-server
+  +--rw sonic-dhcp-server
+     +--rw DHCP_SERVER
+        +--rw DHCP_SERVER_LIST* [ip]
+           +--rw ip    inet:ipv4-address
+
+module: sonic-dhcp-snp
+  +--rw sonic-dhcp-snp
+     +--rw DHCPSNP_GLOBAL
+     |  +--rw IPv4?   string
+     +--rw DHCPSNP_VLAN
+     |  +--rw DHCPSNP_VLAN_LIST* [vlan-name]
+     |     +--rw vlan-name    -> /svlan:sonic-vlan/VLAN/VLAN_LIST/name
+     |     +--rw IPv4?        string
+     +--rw DHCPSNP_TRUST
+        +--rw DHCPSNP_TRUST_LIST* [port_name]
+           +--rw port_name    string
+           +--rw trust?       string
+
+module: sonic-dhcpv6-relay
+  +--rw sonic-dhcpv6-relay
+     +--rw DHCP_RELAY
+        +--rw DHCP_RELAY_LIST* [name]
+           +--rw name               string
+           +--rw dhcpv6_servers*    inet:ipv6-address
+           +--rw rfc6939_support?   string
+           +--rw interface_id?      string
+
+module: sonic-dns
+  +--rw sonic-dns
+     +--rw DNS_NAMESERVER
+        +--rw DNS_NAMESERVER_LIST* [ip]
+           +--rw ip    inet:ip-address
+
+module: sonic-dot1p-tc-map
+  +--rw sonic-dot1p-tc-map
+     +--rw DOT1P_TO_TC_MAP
+        +--rw DOT1P_TO_TC_MAP_LIST* [name]
+           +--rw name               string
+           +--rw DOT1P_TO_TC_MAP* [dot1p]
+              +--rw dot1p    string
+              +--rw tc?      stypes:tc_type
+
+module: sonic-dscp-fc-map
+  +--rw sonic-dscp-fc-map
+     +--rw DSCP_TO_FC_MAP
+        +--rw DSCP_TO_FC_MAP_LIST* [name]
+           +--rw name              string
+           +--rw DSCP_TO_FC_MAP* [dscp]
+              +--rw dscp    string
+              +--rw fc?     string
+
+module: sonic-dscp-tc-map
+  +--rw sonic-dscp-tc-map
+     +--rw DSCP_TO_TC_MAP
+        +--rw DSCP_TO_TC_MAP_LIST* [name]
+           +--rw name              string
+           +--rw DSCP_TO_TC_MAP* [dscp]
+              +--rw dscp    string
+              +--rw tc?     stypes:tc_type
+
+module: sonic-events-bgp
+  +--rw sonic-events-bgp
+     +--rw bgp-state
+     |  +--rw ip?          inet:ip-address
+     |  +--rw status?      stypes:admin_status
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw notification
+     |  +--rw major_code?   uint8
+     |  +--rw minor_code?   uint8
+     |  +--rw ip?           inet:ip-address
+     |  +--rw is_sent?      boolean
+     |  +--rw timestamp?    yang:date-and-time
+     +--rw zebra-no-buff
+        +--rw timestamp?   yang:date-and-time
+
+module: sonic-events-dhcp-relay
+  +--rw sonic-events-dhcp-relay
+     +--rw dhcp-relay-discard
+     |  +--rw ifname?      string
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw dhcp-relay-disparity
+     |  +--rw vlan?        string
+     |  +--rw duration?    uint32
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw dhcp-relay-bind-failure
+        +--rw vlan?        string
+        +--rw type?        enumeration
+        +--rw timestamp?   yang:date-and-time
+
+module: sonic-events-host
+  +--rw sonic-events-host
+     +--rw disk-usage
+     |  +--rw fs?          string
+     |  +--rw usage?       decimal64
+     |  +--rw limit?       decimal64
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw memory-usage
+     |  +--rw usage?       decimal64
+     |  +--rw limit?       decimal64
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw cpu-usage
+     |  +--rw usage?       decimal64
+     |  +--rw limit?       decimal64
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw event-sshd
+     |  +--rw username?    string
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw event-disk
+     |  +--rw fail_type?   enumeration
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw event-kernel
+     |  +--rw fail_type?   enumeration
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw event-down-ctr
+     |  +--rw ctr_name?    string
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw event-stopped-ctr
+     |  +--rw ctr_name?    string
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw watchdog-timeout
+     |  +--rw limit?       uint8
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw event-seu
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw invalid-freelist
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw mem-threshold-exceeded
+     |  +--rw ctr_name?    stypes:ctr_name
+     |  +--rw mem_usage?   decimal64
+     |  +--rw threshold?   uint64
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw process-exited-unexpectedly
+     |  +--rw process_name?   stypes:process_name
+     |  +--rw ctr_name?       stypes:ctr_name
+     |  +--rw timestamp?      yang:date-and-time
+     +--rw process-not-running
+        +--rw process_name?   stypes:process_name
+        +--rw ctr_name?       stypes:ctr_name
+        +--rw timestamp?      yang:date-and-time
+
+module: sonic-events-swss
+  +--rw sonic-events-swss
+     +--rw if-state
+     |  +--rw ifname?      string
+     |  +--rw status?      stypes:admin_status
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw pfc-storm
+     |  +--rw ifname?            string
+     |  +--rw queue_index?       uint8
+     |  +--rw queue_id?          uint64
+     |  +--rw port_id?           uint64
+     |  +--rw additional_info?   string
+     |  +--rw timestamp?         yang:date-and-time
+     +--rw chk_crm_threshold
+     |  +--rw percent?     uint8
+     |  +--rw used_cnt?    uint32
+     |  +--rw free_cnt?    uint32
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw select-operation-failure
+        +--rw operation_result?   string
+        +--rw command?            string
+        +--rw timestamp?          yang:date-and-time
+
+module: sonic-events-syncd
+  +--rw sonic-events-syncd
+     +--rw syncd-failure
+     |  +--rw fail_type?   enumeration
+     |  +--rw timestamp?   yang:date-and-time
+     +--rw alpm-parity-error
+        +--rw operation?   enumeration
+        +--rw ip_family?   stypes:ip-family
+        +--rw timestamp?   yang:date-and-time
+
+module: sonic-exp-fc-map
+  +--rw sonic-exp-fc-map
+     +--rw EXP_TO_FC_MAP
+        +--rw EXP_TO_FC_MAP_LIST* [name]
+           +--rw name             string
+           +--rw EXP_TO_FC_MAP* [exp]
+              +--rw exp    string
+              +--rw fc?    string
+
+module: sonic-fabric-monitor
+  +--rw sonic-fabric-monitor
+     +--rw FABRIC_MONITOR
+        +--rw FABRIC_MONITOR_DATA
+           +--rw monErrThreshCrcCells?     uint32
+           +--rw monErrThreshRxCells?      uint32
+           +--rw monPollThreshIsolation?   uint32
+           +--rw monPollThreshRecovery?    uint32
+
+module: sonic-fabric-port
+  +--rw sonic-fabric-port
+     +--rw FABRIC_PORT
+        +--rw FABRIC_PORT_LIST* [name]
+           +--rw name             string
+           +--rw isolateStatus?   stypes:boolean_type
+           +--rw alias?           string
+           +--rw lanes            string
+
+module: sonic-fdb
+  +--rw sonic-fdb
+     +--rw FDB
+        +--rw FDB_LIST* [vlan_name mac-address]
+           +--rw vlan_name      string
+           +--rw mac-address    yang:mac-address
+           +--rw port           union
+           +--rw type?          enumeration
+
+module: sonic-feature
+  +--rw sonic-feature
+     +--rw FEATURE
+        +--rw FEATURE_LIST* [name]
+           +--rw name                         string
+           +--rw state?                       feature-state
+           +--rw auto_restart?                feature-state
+           +--rw delayed?                     stypes:boolean_type
+           +--rw has_global_scope?            stypes:boolean_type
+           +--rw has_per_asic_scope?          feature-scope-status
+           +--rw high_mem_alert?              feature-state
+           +--rw set_owner?                   feature-owner
+           +--rw check_up_status?             stypes:boolean_type
+           +--rw support_syslog_rate_limit?   stypes:boolean_type
+           +--rw no_container_service?        stypes:boolean_type
+
+module: sonic-fine-grained-ecmp
+  +--rw sonic-fine-grained-ecmp
+     +--rw FG_NHG
+     |  +--rw FG_NHG_LIST* [name]
+     |     +--rw name           string
+     |     +--rw bucket_size    uint16
+     |     +--rw match_mode     match-mode-name
+     +--rw FG_NHG_PREFIX
+     |  +--rw FG_NHG_PREFIX_LIST* [ip_prefix]
+     |     +--rw ip_prefix    stypes:sonic-ip-prefix
+     |     +--rw FG_NHG       -> /sonic-fine-grained-ecmp/FG_NHG/FG_NHG_LIST/name
+     +--rw FG_NHG_MEMBER
+        +--rw FG_NHG_MEMBER_LIST* [next_hop_ip]
+           +--rw next_hop_ip    inet:ip-address
+           +--rw FG_NHG         -> /sonic-fine-grained-ecmp/FG_NHG/FG_NHG_LIST/name
+           +--rw bank           uint16
+           +--rw link?          union
+
+module: sonic-fips
+  +--rw sonic-fips
+     +--rw FIPS
+        +--rw global
+           +--rw enable?    stypes:boolean_type
+           +--rw enforce?   stypes:boolean_type
+
+module: sonic-flex_counter
+  +--rw sonic-flex_counter
+     +--rw FLEX_COUNTER_TABLE
+     |  +--rw BUFFER_POOL_WATERMARK
+     |  |  +--rw FLEX_COUNTER_STATUS?         flex_status
+     |  |  +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |  |  +--rw POLL_INTERVAL?               poll_interval
+     |  +--rw DEBUG_COUNTER
+     |  |  +--rw FLEX_COUNTER_STATUS?         flex_status
+     |  |  +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |  +--rw PFCWD
+     |  |  +--rw FLEX_COUNTER_STATUS?         flex_status
+     |  |  +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |  +--rw PG_DROP
+     |  |  +--rw FLEX_COUNTER_STATUS?         flex_status
+     |  |  +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |  |  +--rw POLL_INTERVAL?               poll_interval
+     |  +--rw PG_WATERMARK
+     |  |  +--rw FLEX_COUNTER_STATUS?         flex_status
+     |  |  +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |  |  +--rw POLL_INTERVAL?               poll_interval
+     |  +--rw PORT
+     |  |  +--rw FLEX_COUNTER_STATUS?         flex_status
+     |  |  +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |  |  +--rw POLL_INTERVAL?               poll_interval
+     |  +--rw PORT_RATES
+     |  |  +--rw FLEX_COUNTER_STATUS?         flex_status
+     |  |  +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |  +--rw PORT_BUFFER_DROP
+     |  |  +--rw FLEX_COUNTER_STATUS?         flex_status
+     |  |  +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |  |  +--rw POLL_INTERVAL?               poll_interval
+     |  +--rw QUEUE
+     |  |  +--rw FLEX_COUNTER_STATUS?         flex_status
+     |  |  +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |  |  +--rw POLL_INTERVAL?               poll_interval
+     |  +--rw QUEUE_WATERMARK
+     |  |  +--rw FLEX_COUNTER_STATUS?         flex_status
+     |  |  +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |  |  +--rw POLL_INTERVAL?               poll_interval
+     |  +--rw RIF
+     |  |  +--rw FLEX_COUNTER_STATUS?         flex_status
+     |  |  +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |  |  +--rw POLL_INTERVAL?               poll_interval
+     |  +--rw RIF_RATES
+     |  |  +--rw FLEX_COUNTER_STATUS?         flex_status
+     |  |  +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |  +--rw ACL
+     |  |  +--rw FLEX_COUNTER_STATUS?         flex_status
+     |  |  +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |  |  +--rw POLL_INTERVAL?               poll_interval
+     |  +--rw FLOW_CNT_TRAP
+     |  |  +--rw FLEX_COUNTER_STATUS?         flex_status
+     |  |  +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |  |  +--rw POLL_INTERVAL?               poll_interval
+     |  +--rw FLOW_CNT_ROUTE
+     |  |  +--rw FLEX_COUNTER_STATUS?         flex_status
+     |  |  +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |  |  +--rw POLL_INTERVAL?               poll_interval
+     |  +--rw TUNNEL
+     |  |  +--rw FLEX_COUNTER_STATUS?         flex_status
+     |  |  +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |  |  +--rw POLL_INTERVAL?               poll_interval
+     |  +--rw WRED_ECN_QUEUE
+     |  |  +--rw FLEX_COUNTER_STATUS?         flex_status
+     |  |  +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |  |  +--rw POLL_INTERVAL?               poll_interval
+     |  +--rw WRED_ECN_PORT
+     |     +--rw FLEX_COUNTER_STATUS?         flex_status
+     |     +--rw FLEX_COUNTER_DELAY_STATUS?   flex_delay_status
+     |     +--rw POLL_INTERVAL?               poll_interval
+     +--rw FLOW_COUNTER_ROUTE_PATTERN
+        +--rw FLOW_COUNTER_ROUTE_PATTERN_LIST* [ip_prefix]
+        |  +--rw ip_prefix          inet:ip-prefix
+        |  +--rw max_match_count?   uint32
+        +--rw FLOW_COUNTER_ROUTE_PATTERN_VRF_LIST* [vrf_name ip_prefix]
+           +--rw vrf_name           string
+           +--rw ip_prefix          inet:ip-prefix
+           +--rw max_match_count?   uint32
+
+module: sonic-gnmi
+  +--rw sonic-gnmi
+     +--rw GNMI
+        +--rw certs
+        |  +--rw ca_crt?       string
+        |  +--rw server_crt?   string
+        |  +--rw server_key?   string
+        +--rw gnmi
+           +--rw client_auth?   boolean
+           +--rw log_level?     uint8
+           +--rw port?          inet:port-number
+
+module: sonic-hash
+  +--rw sonic-hash
+     +--rw SWITCH_HASH
+        +--rw GLOBAL
+           +--rw ecmp_hash*             hash:hash-field
+           +--rw lag_hash*              hash:hash-field
+           +--rw ecmp_hash_algorithm?   stypes:hash-algorithm
+           +--rw lag_hash_algorithm?    stypes:hash-algorithm
+
+module: sonic-interface
+  +--rw sonic-interface
+     +--rw INTERFACE
+        +--rw INTERFACE_LIST* [name]
+        |  +--rw name                        -> /port:sonic-port/PORT/PORT_LIST/name
+        |  +--rw vrf_name?                   -> /vrf:sonic-vrf/VRF/VRF_LIST/name
+        |  +--rw nat_zone?                   uint8
+        |  +--rw mpls?                       enumeration
+        |  +--rw ipv6_use_link_local_only?   stypes:mode-status
+        |  +--rw grat_arp?                   string
+        |  +--rw loopback_action?            stypes:loopback_action
+        +--rw INTERFACE_IPPREFIX_LIST* [name ip-prefix]
+           +--rw name         -> /port:sonic-port/PORT/PORT_LIST/name
+           +--rw ip-prefix    union
+           +--rw scope?       enumeration
+           +--rw family?      stypes:ip-family
+
+module: sonic-kdump
+  +--rw sonic-kdump
+     +--rw KDUMP
+        +--rw config
+           +--rw enabled?     boolean
+           +--rw memory?      string
+           +--rw num_dumps?   uint8
+
+module: sonic-kubernetes_master
+  +--rw sonic-kubernetes_master
+     +--rw KUBERNETES_MASTER
+        +--rw SERVER
+           +--rw ip?         inet:host
+           +--rw port?       inet:port-number
+           +--rw disable?    stypes:boolean_type
+           +--rw insecure?   stypes:boolean_type
+
+module: sonic-lldp
+  +--rw sonic-lldp
+     +--rw LLDP
+     |  +--rw GLOBAL
+     |     +--rw hello_time?                     uint8
+     |     +--rw multiplier?                     uint8
+     |     +--rw system_name?                    string
+     |     +--rw system_description?             string
+     |     +--rw mgmt_ip?                        string
+     |     +--rw supp_mgmt_address_tlv?          boolean
+     |     +--rw supp_system_capabilities_tlv?   boolean
+     |     +--rw enabled?                        boolean
+     |     +--rw mode?                           enumeration
+     +--rw LLDP_PORT
+     |  +--rw LLDP_PORT_LIST* [ifname]
+     |     +--rw ifname     -> /prt:sonic-port/PORT/PORT_LIST/name
+     |     +--rw enabled?   boolean
+     |     +--rw mode?      enumeration
+     +--rw LLDP_INTERFACE
+        +--rw LLDP_INTERFACE_LIST* [ifname]
+           +--rw ifname          -> /prt:sonic-port/PORT/PORT_LIST/name
+           +--rw dcbx_pfc?       string
+           +--rw dcbx_ets_cfg?   string
+           +--rw dcbx_ets_rec?   string
+           +--rw enabled?        boolean
+           +--rw mode?           enumeration
+
+module: sonic-logger
+  +--rw sonic-logger
+     +--rw LOGGER
+        +--rw LOGGER_LIST* [name]
+           +--rw name         string
+           +--rw LOGLEVEL     union
+           +--rw LOGOUTPUT?   enumeration
+
+module: sonic-loopback-interface
+  +--rw sonic-loopback-interface
+     +--rw LOOPBACK_INTERFACE
+        +--rw LOOPBACK_INTERFACE_LIST* [name]
+        |  +--rw name        string
+        |  +--rw vrf_name?   -> /vrf:sonic-vrf/VRF/VRF_LIST/name
+        |  +--rw nat_zone?   uint8
+        +--rw LOOPBACK_INTERFACE_IPPREFIX_LIST* [name ip-prefix]
+           +--rw name         -> ../../LOOPBACK_INTERFACE_LIST/name
+           +--rw ip-prefix    union
+           +--rw scope?       enumeration
+           +--rw family?      stypes:ip-family
+
+module: sonic-lossless-traffic-pattern
+  +--rw sonic-lossless-traffic-pattern
+     +--rw LOSSLESS_TRAFFIC_PATTERN
+        +--rw LOSSLESS_TRAFFIC_PATTERN_LIST* [name]
+           +--rw name                       string
+           +--rw mtu                        uint16
+           +--rw small_packet_percentage    uint8
+
+module: sonic-macsec
+  +--rw sonic-macsec
+     +--rw MACSEC_PROFILE
+        +--rw MACSEC_PROFILE_LIST* [name]
+           +--rw name                     string
+           +--rw priority?                uint8
+           +--rw cipher_suite?            string
+           +--rw primary_cak              string
+           +--rw primary_ckn              string
+           +--rw fallback_cak?            string
+           +--rw fallback_ckn?            string
+           +--rw policy?                  string
+           +--rw enable_replay_protect?   stypes:boolean_type
+           +--rw replay_window?           uint32
+           +--rw send_sci?                stypes:boolean_type
+           +--rw rekey_period?            uint32
+
+module: sonic-mclag
+  +--rw sonic-mclag
+     +--rw MCLAG_DOMAIN
+     |  +--rw MCLAG_DOMAIN_LIST* [domain_id]
+     |     +--rw domain_id             uint16
+     |     +--rw source_ip?            inet:ipv4-address
+     |     +--rw peer_ip?              inet:ipv4-address
+     |     +--rw peer_link?            union
+     |     +--rw keepalive_interval?   uint16
+     |     +--rw session_timeout?      uint16
+     |     +--rw mclag_system_id?      string
+     +--rw MCLAG_INTERFACE
+     |  +--rw MCLAG_INTERFACE_LIST* [domain_id if_name]
+     |     +--rw domain_id    -> ../../../MCLAG_DOMAIN/MCLAG_DOMAIN_LIST/domain_id
+     |     +--rw if_name      -> /lag:sonic-portchannel/PORTCHANNEL/PORTCHANNEL_LIST/name
+     |     +--rw if_type?     string
+     +--rw MCLAG_UNIQUE_IP
+        +--rw MCLAG_UNIQUE_IP_LIST* [if_name]
+           +--rw if_name      string
+           +--rw unique_ip?   enumeration
+
+module: sonic-mgmt_interface
+  +--rw sonic-mgmt_interface
+     +--rw MGMT_INTERFACE
+        +--rw MGMT_INTERFACE_LIST* [name ip_prefix]
+           +--rw name                  -> /mgmtprt:sonic-mgmt_port/MGMT_PORT/MGMT_PORT_LIST/name
+           +--rw ip_prefix             stypes:sonic-ip-prefix
+           +--rw gwaddr?               inet:ip-address
+           +--rw forced_mgmt_routes*   union
+
+module: sonic-mgmt_port
+  +--rw sonic-mgmt_port
+     +--rw MGMT_PORT
+        +--rw MGMT_PORT_LIST* [name]
+           +--rw name            string
+           +--rw speed?          uint16
+           +--rw autoneg?        string
+           +--rw alias?          string
+           +--rw description?    string
+           +--rw mtu?            uint16
+           +--rw admin_status?   stypes:admin_status
+
+module: sonic-mgmt_vrf
+  +--rw sonic-mgmt_vrf
+     +--rw MGMT_VRF_CONFIG
+        +--rw vrf_global
+           +--rw mgmtVrfEnabled?         boolean
+           +--rw in_band_mgmt_enabled?   boolean
+
+module: sonic-mirror-session
+  +--rw sonic-mirror-session
+     +--rw MIRROR_SESSION
+        +--rw MIRROR_SESSION_LIST* [name]
+           +--rw name         string
+           +--rw type?        session_type
+           +--rw src_ip?      inet:ipv4-address
+           +--rw dst_ip?      inet:ipv4-address
+           +--rw gre_type?    string
+           +--rw dscp?        uint8
+           +--rw ttl?         uint8
+           +--rw queue?       uint8
+           +--rw dst_port?    union
+           +--rw src_port?    string
+           +--rw direction?   session_direction
+           +--rw policer?     -> /policer:sonic-policer/POLICER/POLICER_LIST/name
+
+module: sonic-mpls-tc-map
+  +--rw sonic-mpls-tc-map
+     +--rw MPLS_TC_TO_TC_MAP
+        +--rw MPLS_TC_TO_TC_MAP_LIST* [name]
+           +--rw name                 string
+           +--rw MPLS_TC_TO_TC_MAP* [mpls]
+              +--rw mpls    string
+              +--rw tc?     stypes:tc_type
+
+module: sonic-mux-cable
+  +--rw sonic-mux-cable
+     +--rw MUX_CABLE
+        +--rw MUX_CABLE_LIST* [ifname]
+           +--rw ifname         -> /prt:sonic-port/PORT/PORT_LIST/name
+           +--rw cable_type?    enumeration
+           +--rw server_ipv4?   inet:ipv4-prefix
+           +--rw server_ipv6?   inet:ipv6-prefix
+           +--rw soc_ipv4?      inet:ipv4-prefix
+           +--rw soc_ipv6?      inet:ipv6-prefix
+           +--rw state?         enumeration
+
+module: sonic-mux-linkmgr
+  +--rw sonic-mux-linkmgr
+     +--rw MUX_LINKMGR
+        +--rw LINK_PROBER
+        |  +--rw interval_v4?                      uint32
+        |  +--rw interval_v6?                      uint32
+        |  +--rw positive_signal_count?            uint32
+        |  +--rw negative_signal_count?            uint32
+        |  +--rw suspend_timer?                    uint32
+        |  +--rw use_well_known_mac?               enumeration
+        |  +--rw src_mac?                          enumeration
+        |  +--rw interval_pck_loss_count_update?   uint32
+        +--rw MUXLOGGER
+        |  +--rw log_verbosity?   enumeration
+        +--rw SERVICE_MGMT
+           +--rw kill_radv?   enumeration
+
+module: sonic-nat
+  +--rw sonic-nat
+     +--rw STATIC_NAPT
+     |  +--rw STATIC_NAPT_LIST* [global_ip ip_protocol global_l4_port]
+     |     +--rw global_ip         inet:ipv4-address
+     |     +--rw ip_protocol       stypes:ip-protocol-type
+     |     +--rw global_l4_port    inet:port-number
+     |     +--rw local_ip          inet:ipv4-address
+     |     +--rw local_port        inet:port-number
+     |     +--rw nat_type?         nat-type
+     |     +--rw twice_nat_id?     uint16
+     +--rw STATIC_NAT
+     |  +--rw STATIC_NAT_LIST* [global_ip]
+     |     +--rw global_ip       inet:ipv4-address
+     |     +--rw local_ip        inet:ipv4-address
+     |     +--rw nat_type?       nat-type
+     |     +--rw twice_nat_id?   uint16
+     +--rw NAT_GLOBAL
+     |  +--rw Values
+     |     +--rw admin_mode?        stypes:admin_mode
+     |     +--rw nat_timeout?       uint32
+     |     +--rw nat_tcp_timeout?   uint32
+     |     +--rw nat_udp_timeout?   uint16
+     +--rw NAT_POOL
+     |  +--rw NAT_POOL_LIST* [name]
+     |     +--rw name        string
+     |     +--rw nat_ip      ip-address-range
+     |     +--rw nat_port?   string
+     +--rw NAT_BINDINGS
+        +--rw NAT_BINDINGS_LIST* [name]
+           +--rw name            string
+           +--rw nat_pool        -> ../../../NAT_POOL/NAT_POOL_LIST/name
+           +--rw nat_type?       nat-type
+           +--rw twice_nat_id?   uint16
+
+module: sonic-neigh
+  +--rw sonic-neigh
+     +--rw NEIGH
+        +--rw NEIGH_LIST* [vlan neighbor]
+           +--rw vlan        string
+           +--rw neighbor    inet:ip-address
+           +--rw neigh?      yang:mac-address
+           +--rw family?     string
+
+module: sonic-ntp
+  +--rw sonic-ntp
+     +--rw NTP
+     |  +--rw global
+     |     +--rw src_intf*         union
+     |     +--rw vrf?              string
+     |     +--rw authentication?   stypes:admin_mode
+     |     +--rw dhcp?             stypes:admin_mode
+     |     +--rw server_role?      stypes:admin_mode
+     |     +--rw admin_state?      stypes:admin_mode
+     +--rw NTP_SERVER
+     |  +--rw NTP_SERVER_LIST* [server_address]
+     |     +--rw server_address      inet:host
+     |     +--rw association_type?   association-type
+     |     +--rw iburst?             stypes:on-off
+     |     +--rw key?                -> /sonic-ntp/NTP_KEY/NTP_KEYS_LIST/id
+     |     +--rw resolve_as?         inet:host
+     |     +--rw admin_state?        stypes:admin_mode
+     |     +--rw trusted?            stypes:yes-no
+     |     +--rw version?            uint8
+     +--rw NTP_KEY
+        +--rw NTP_KEYS_LIST* [id]
+           +--rw id         key-id
+           +--rw trusted?   stypes:yes-no
+           +--rw value?     string
+           +--rw type?      key-type
+
+module: sonic-nvgre-tunnel
+  +--rw sonic-nvgre-tunnel
+     +--rw NVGRE_TUNNEL
+     |  +--rw NVGRE_TUNNEL_LIST* [tunnel_name]
+     |     +--rw tunnel_name    string
+     |     +--rw src_ip         inet:ip-address
+     +--rw NVGRE_TUNNEL_MAP
+        +--rw NVGRE_TUNNEL_MAP_LIST* [tunnel_name tunnel_map_name]
+           +--rw tunnel_name        -> /sonic-nvgre-tunnel/NVGRE_TUNNEL/NVGRE_TUNNEL_LIST/tunnel_name
+           +--rw tunnel_map_name    string
+           +--rw vlan_id            uint16
+           +--rw vsid               uint32
+
+module: sonic-obj-track
+  +--rw sonic-obj-track
+     +--rw OBJ_TRACK
+        +--rw OBJ_TRACK_LIST* [session_name]
+           +--rw session_name               string
+           +--rw tracked_port_list*         union
+           +--rw tracked_bgp_nbr_list*      union
+           +--rw downlink_interface_list*   union
+           +--rw guard_time?                uint16
+           +--rw state?                     string
+
+module: sonic-passwh
+  +--rw sonic-passwh
+     +--rw PASSW_HARDENING
+        +--rw POLICIES
+           +--rw state?                     feature_state
+           +--rw expiration?                int16
+           +--rw expiration_warning?        int8
+           +--rw history_cnt?               uint8
+           +--rw len_min?                   uint8
+           +--rw reject_user_passw_match?   boolean
+           +--rw lower_class?               boolean
+           +--rw upper_class?               boolean
+           +--rw digits_class?              boolean
+           +--rw special_class?             boolean
+
+module: sonic-pbh
+  +--rw sonic-pbh
+     +--rw PBH_HASH_FIELD
+     |  +--rw PBH_HASH_FIELD_LIST* [hash_field_name]
+     |     +--rw hash_field_name    string
+     |     +--rw hash_field         pbh:hash-field
+     |     +--rw ip_mask            inet:ip-address-no-zone
+     |     +--rw sequence_id        uint32
+     +--rw PBH_HASH
+     |  +--rw PBH_HASH_LIST* [hash_name]
+     |     +--rw hash_name          string
+     |     +--rw hash_field_list*   -> /sonic-pbh/PBH_HASH_FIELD/PBH_HASH_FIELD_LIST/hash_field_name
+     +--rw PBH_RULE
+     |  +--rw PBH_RULE_LIST* [table_name rule_name]
+     |     +--rw table_name          -> /sonic-pbh/PBH_TABLE/PBH_TABLE_LIST/table_name
+     |     +--rw rule_name           string
+     |     +--rw priority            uint32
+     |     +--rw gre_key?            string
+     |     +--rw ether_type?         string
+     |     +--rw ip_protocol?        string
+     |     +--rw ipv6_next_header?   string
+     |     +--rw l4_dst_port?        string
+     |     +--rw inner_ether_type?   string
+     |     +--rw hash                -> /sonic-pbh/PBH_HASH/PBH_HASH_LIST/hash_name
+     |     +--rw packet_action?      pbh:packet-action
+     |     +--rw flow_counter?       pbh:flow-counter
+     +--rw PBH_TABLE
+        +--rw PBH_TABLE_LIST* [table_name]
+           +--rw table_name        string
+           +--rw interface_list*   union
+           +--rw description       string
+
+module: sonic-peer-switch
+  +--rw sonic-peer-switch
+     +--rw PEER_SWITCH
+        +--rw PEER_SWITCH_LIST* [peer_switch]
+           +--rw peer_switch     stypes:hostname
+           +--rw address_ipv4?   inet:ipv4-address
+
+module: sonic-pfc-priority-priority-group-map
+  +--rw sonic-pfc-priority-priority-group-map
+     +--rw PFC_PRIORITY_TO_PRIORITY_GROUP_MAP
+        +--rw PFC_PRIORITY_TO_PRIORITY_GROUP_MAP_LIST* [name]
+           +--rw name                                  string
+           +--rw PFC_PRIORITY_TO_PRIORITY_GROUP_MAP* [pfc_priority]
+              +--rw pfc_priority    string
+              +--rw pg?             string
+
+module: sonic-pfc-priority-queue-map
+  +--rw sonic-pfc-priority-queue-map
+     +--rw MAP_PFC_PRIORITY_TO_QUEUE
+        +--rw MAP_PFC_PRIORITY_TO_QUEUE_LIST* [name]
+           +--rw name                         string
+           +--rw MAP_PFC_PRIORITY_TO_QUEUE* [pfc_priority]
+              +--rw pfc_priority    string
+              +--rw qindex?         string
+
+module: sonic-pfcwd
+  +--rw sonic-pfcwd
+     +--rw PFC_WD
+        +--rw PFC_WD_LIST* [ifname]
+           +--rw ifname              union
+           +--rw action?             enumeration
+           +--rw detection_time?     uint32
+           +--rw restoration_time?   uint32
+           +--rw POLL_INTERVAL?      uint32
+
+module: sonic-policer
+  +--rw sonic-policer
+     +--rw POLICER
+        +--rw POLICER_LIST* [name]
+           +--rw name                    string
+           +--rw meter_type              stypes:meter_type
+           +--rw mode                    stypes:policer_mode
+           +--rw color?                  stypes:policer_color_source
+           +--rw cir?                    uint64
+           +--rw cbs?                    uint64
+           +--rw pir?                    uint64
+           +--rw pbs?                    uint64
+           +--rw green_packet_action?    stypes:policer_packet_action
+           +--rw yellow_packet_action?   stypes:policer_packet_action
+           +--rw red_packet_action?      stypes:policer_packet_action
+
+module: sonic-port-qos-map
+  +--rw sonic-port-qos-map
+     +--rw PORT_QOS_MAP
+        +--rw PORT_QOS_MAP_LIST* [ifname]
+           +--rw ifname              union
+           +--rw tc_to_pg_map?       -> /tpgm:sonic-tc-priority-group-map/TC_TO_PRIORITY_GROUP_MAP/TC_TO_PRIORITY_GROUP_MAP_LIST/name
+           +--rw tc_to_queue_map?    -> /tqm:sonic-tc-queue-map/TC_TO_QUEUE_MAP/TC_TO_QUEUE_MAP_LIST/name
+           +--rw pfc_enable?         string
+           +--rw pfcwd_sw_enable?    string
+           +--rw pfc_to_queue_map?   -> /ppqm:sonic-pfc-priority-queue-map/MAP_PFC_PRIORITY_TO_QUEUE/MAP_PFC_PRIORITY_TO_QUEUE_LIST/name
+           +--rw pfc_to_pg_map?      -> /pppgm:sonic-pfc-priority-priority-group-map/PFC_PRIORITY_TO_PRIORITY_GROUP_MAP/PFC_PRIORITY_TO_PRIORITY_GROUP_MAP_LIST/name
+           +--rw dscp_to_tc_map?     -> /dtm:sonic-dscp-tc-map/DSCP_TO_TC_MAP/DSCP_TO_TC_MAP_LIST/name
+           +--rw dot1p_to_tc_map?    -> /dot1ptm:sonic-dot1p-tc-map/DOT1P_TO_TC_MAP/DOT1P_TO_TC_MAP_LIST/name
+           +--rw tc_to_dot1p_map?    -> /tcdot1pm:sonic-tc-dot1p-map/TC_TO_DOT1P_MAP/TC_TO_DOT1P_MAP_LIST/name
+           +--rw tc_to_dscp_map?     -> /tcdscpm:sonic-tc-dscp-map/TC_TO_DSCP_MAP/TC_TO_DSCP_MAP_LIST/name
+           +--rw scheduler?          -> /sch:sonic-scheduler/SCHEDULER/SCHEDULER_LIST/name
+
+module: sonic-port
+  +--rw sonic-port
+     +--rw PORT
+        +--rw PORT_LIST* [name]
+           +--rw name                   string
+           +--rw alias?                 string
+           +--rw lanes                  string
+           +--rw description?           string
+           +--rw speed                  uint32
+           +--rw link_training?         string
+           +--rw autoneg?               string
+           +--rw adv_speeds*            union
+           +--rw interface_type?        stypes:interface_type
+           +--rw adv_interface_types*   union
+           +--rw mtu?                   uint16
+           +--rw subport?               uint8
+           +--rw index?                 uint16
+           +--rw asic_port_name?        string
+           +--rw arp_reply?             stypes:arp_reply
+           +--rw role?                  string
+           +--rw admin_status?          stypes:admin_status
+           +--rw fec?                   string
+           +--rw pfc_asym?              string
+           +--rw tpid?                  stypes:tpid_type
+           +--rw mux_cable?             boolean
+           +--rw macsec?                -> /macsec:sonic-macsec/MACSEC_PROFILE/MACSEC_PROFILE_LIST/name
+           +--rw tx_power?              decimal64
+           +--rw laser_freq?            int32
+           +--rw parent_port?           string
+           +--rw grid_space?            int16
+           +--rw application_code?      string
+           +--rw flow_control?          string
+           +--rw pms_enable?            string
+           +--rw pms_maximum?           uint16
+           +--rw pms_violation?         string
+
+module: sonic-portchannel
+  +--rw sonic-portchannel
+     +--rw PORTCHANNEL
+     |  +--rw PORTCHANNEL_LIST* [name]
+     |     +--rw name            string
+     |     +--rw min_links?      uint16
+     |     +--rw description?    string
+     |     +--rw mtu?            uint16
+     |     +--rw admin_status    stypes:admin_status
+     |     +--rw lacp_key?       union
+     |     +--rw tpid?           stypes:tpid_type
+     |     +--rw fallback?       stypes:boolean_type
+     |     +--rw fast_rate?      stypes:boolean_type
+     |     +--rw static?         boolean
+     |     +--rw mix_speed?      boolean
+     +--rw PORTCHANNEL_MEMBER
+     |  +--rw PORTCHANNEL_MEMBER_LIST* [name port]
+     |     +--rw name    -> /sonic-portchannel/PORTCHANNEL/PORTCHANNEL_LIST/name
+     |     +--rw port    -> /port:sonic-port/PORT/PORT_LIST/name
+     +--rw PORTCHANNEL_INTERFACE
+        +--rw PORTCHANNEL_INTERFACE_LIST* [name]
+        |  +--rw name                        -> /sonic-portchannel/PORTCHANNEL/PORTCHANNEL_LIST/name
+        |  +--rw arp_reply?                  stypes:arp_reply
+        |  +--rw vrf_name?                   -> /vrf:sonic-vrf/VRF/VRF_LIST/name
+        |  +--rw loopback_action?            stypes:loopback_action
+        |  +--rw nat_zone?                   uint8
+        |  +--rw mpls?                       enumeration
+        |  +--rw ipv6_use_link_local_only?   stypes:mode-status
+        |  +--rw grat_arp?                   string
+        +--rw PORTCHANNEL_INTERFACE_IPPREFIX_LIST* [name ip_prefix]
+           +--rw name         -> /sonic-portchannel/PORTCHANNEL/PORTCHANNEL_LIST/name
+           +--rw ip_prefix    stypes:sonic-ip-prefix
+
+module: sonic-queue
+  +--rw sonic-queue
+     +--rw QUEUE
+        +--rw QUEUE_LIST* [ifname qindex]
+           +--rw ifname          union
+           +--rw qindex          string
+           +--rw scheduler?      -> /sch:sonic-scheduler/SCHEDULER/SCHEDULER_LIST/name
+           +--rw wred_profile?   -> /wrd:sonic-wred-profile/WRED_PROFILE/WRED_PROFILE_LIST/name
+
+module: sonic-restapi
+  +--rw sonic-restapi
+     +--rw RESTAPI
+        +--rw certs
+        |  +--rw ca_crt?             string
+        |  +--rw server_crt?         string
+        |  +--rw client_crt_cname?   string
+        |  +--rw server_key?         string
+        +--rw config
+           +--rw client_auth?      boolean
+           +--rw log_level?        string
+           +--rw allow_insecure?   boolean
+
+module: sonic-route-common
+  +--rw sonic-route-common
+     +--rw ROUTE_REDISTRIBUTE
+        +--rw ROUTE_REDISTRIBUTE_LIST* [vrf_name src_protocol dst_protocol addr_family]
+           +--rw vrf_name        union
+           +--rw src_protocol    string
+           +--rw dst_protocol    string
+           +--rw addr_family     string
+           +--rw route_map*      -> /rmap:sonic-route-map/ROUTE_MAP_SET/ROUTE_MAP_SET_LIST/name
+           +--rw metric?         uint32
+
+module: sonic-route-map
+  +--rw sonic-route-map
+     +--rw ROUTE_MAP_SET
+     |  +--rw ROUTE_MAP_SET_LIST* [name]
+     |     +--rw name    string
+     +--rw ROUTE_MAP
+        +--rw ROUTE_MAP_LIST* [name stmt_name]
+           +--rw name                               string
+           +--rw stmt_name                          uint16
+           +--rw route_operation?                   rpolsets:routing-policy-action-type
+           +--rw match_interface?                   route-map-intf
+           +--rw match_prefix_set?                  -> /rpolsets:sonic-routing-policy-sets/PREFIX_SET/PREFIX_SET_LIST/name
+           +--rw match_ipv6_prefix_set?             -> /rpolsets:sonic-routing-policy-sets/PREFIX_SET/PREFIX_SET_LIST/name
+           +--rw match_protocol?                    string
+           +--rw match_next_hop_set?                -> /rpolsets:sonic-routing-policy-sets/PREFIX_SET/PREFIX_SET_LIST/name
+           +--rw match_src_vrf?                     union
+           +--rw match_neighbor*                    union
+           +--rw match_tag*                         uint32
+           +--rw match_med?                         uint32
+           +--rw match_origin?                      string
+           +--rw match_local_pref?                  uint32
+           +--rw match_community?                   -> /rpolsets:sonic-routing-policy-sets/COMMUNITY_SET/COMMUNITY_SET_LIST/name
+           +--rw match_ext_community?               -> /rpolsets:sonic-routing-policy-sets/EXTENDED_COMMUNITY_SET/EXTENDED_COMMUNITY_SET_LIST/name
+           +--rw match_as_path?                     -> /rpolsets:sonic-routing-policy-sets/AS_PATH_SET/AS_PATH_SET_LIST/name
+           +--rw call_route_map?                    -> ../../../ROUTE_MAP_SET/ROUTE_MAP_SET_LIST/name
+           +--rw set_origin?                        string
+           +--rw set_local_pref?                    uint32
+           +--rw set_med?                           uint32
+           +--rw set_metric_action?                 metric-action-type
+           +--rw set_metric?                        uint32
+           +--rw set_next_hop?                      string
+           +--rw set_ipv6_next_hop_global?          string
+           +--rw set_ipv6_next_hop_prefer_global?   boolean
+           +--rw set_repeat_asn?                    uint8
+           +--rw set_asn?                           uint32
+           +--rw set_asn_list?                      string
+           +--rw set_community_inline*              string
+           +--rw set_community_ref?                 -> /rpolsets:sonic-routing-policy-sets/COMMUNITY_SET/COMMUNITY_SET_LIST/name
+           +--rw set_ext_community_inline*          string
+           +--rw set_ext_community_ref?             -> /rpolsets:sonic-routing-policy-sets/EXTENDED_COMMUNITY_SET/EXTENDED_COMMUNITY_SET_LIST/name
+           +--rw set_tag?                           uint32
+
+module: sonic-routing-policy-sets
+  +--rw sonic-routing-policy-sets
+     +--rw PREFIX_SET
+     |  +--rw PREFIX_SET_LIST* [name]
+     |     +--rw name    string
+     |     +--rw mode?   enumeration
+     +--rw PREFIX
+     |  +--rw PREFIX_LIST* [name sequence_number ip_prefix masklength_range]
+     |     +--rw name                -> ../../../PREFIX_SET/PREFIX_SET_LIST/name
+     |     +--rw sequence_number     uint32
+     |     +--rw ip_prefix           inet:ip-prefix
+     |     +--rw masklength_range    string
+     |     +--rw action?             routing-policy-action-type
+     +--rw COMMUNITY_SET
+     |  +--rw COMMUNITY_SET_LIST* [name]
+     |     +--rw name                string
+     |     +--rw set_type?           enumeration
+     |     +--rw match_action?       enumeration
+     |     +--rw action?             routing-policy-action-type
+     |     +--rw community_member*   string
+     +--rw EXTENDED_COMMUNITY_SET
+     |  +--rw EXTENDED_COMMUNITY_SET_LIST* [name]
+     |     +--rw name                string
+     |     +--rw set_type?           enumeration
+     |     +--rw match_action?       enumeration
+     |     +--rw action?             routing-policy-action-type
+     |     +--rw community_member*   string
+     +--rw AS_PATH_SET
+        +--rw AS_PATH_SET_LIST* [name]
+           +--rw name                  string
+           +--rw action?               routing-policy-action-type
+           +--rw as_path_set_member*   string
+
+module: sonic-scheduler
+  +--rw sonic-scheduler
+     +--rw SCHEDULER
+        +--rw SCHEDULER_LIST* [name]
+           +--rw name          string
+           +--rw type?         enumeration
+           +--rw weight?       uint8
+           +--rw priority?     uint8
+           +--rw meter_type?   enumeration
+           +--rw cir?          uint64
+           +--rw pir?          uint64
+           +--rw cbs?          uint32
+           +--rw pbs?          uint32
+
+module: sonic-sflow
+  +--rw sonic-sflow
+     +--rw SFLOW_COLLECTOR
+     |  +--rw SFLOW_COLLECTOR_LIST* [name]
+     |     +--rw name              string
+     |     +--rw collector_ip      inet:ip-address
+     |     +--rw collector_port?   inet:port-number
+     |     +--rw collector_vrf?    string
+     +--rw SFLOW_SESSION
+     |  +--rw SFLOW_SESSION_LIST* [port]
+     |     +--rw port                union
+     |     +--rw admin_state?        stypes:admin_status
+     |     +--rw sample_rate?        uint32
+     |     +--rw sample_direction?   sample_direction
+     +--rw SFLOW
+        +--rw global
+           +--rw admin_state?          stypes:admin_status
+           +--rw polling_interval?     uint16
+           +--rw drop_monitor_limit?   uint16
+           +--rw agent_id?             union
+           +--rw sample_direction?     sample_direction
+
+module: sonic-snmp
+  +--rw sonic-snmp
+     +--rw SNMP
+     |  +--rw CONTACT
+     |  |  +--rw Contact?   string
+     |  +--rw LOCATION
+     |     +--rw Location?   string
+     +--rw SNMP_COMMUNITY
+     |  +--rw SNMP_COMMUNITY_LIST* [name]
+     |     +--rw name    string
+     |     +--rw TYPE?   enumeration
+     +--rw SNMP_USER
+     |  +--rw SNMP_USER_LIST* [name]
+     |     +--rw name                             string
+     |     +--rw SNMP_USER_TYPE                   enumeration
+     |     +--rw SNMP_USER_PERMISSION             enumeration
+     |     +--rw SNMP_USER_AUTH_TYPE?             string
+     |     +--rw SNMP_USER_AUTH_PASSWORD?         string
+     |     +--rw SNMP_USER_ENCRYPTION_TYPE?       string
+     |     +--rw SNMP_USER_ENCRYPTION_PASSWORD    string
+     +--rw SNMP_AGENT_ADDRESS_CONFIG
+        +--rw SNMP_AGENT_ADDRESS_CONFIG_LIST* [agent_ip port vrf_name]
+           +--rw agent_ip    inet:ip-address
+           +--rw port        union
+           +--rw vrf_name    union
+
+module: sonic-ssh-server
+  +--rw sonic-ssh-server
+     +--rw SSH_SERVER
+        +--rw POLICIES
+           +--rw authentication_retries?   uint32
+           +--rw login_timeout?            uint32
+           +--rw ports?                    string
+
+module: sonic-static-anycast-gateway
+  +--rw sonic-static-anycast-gateway
+     +--rw SAG
+        +--rw SAG_LIST* [name]
+           +--rw name           string
+           +--rw gateway_mac?   yang:mac-address
+
+module: sonic-static-route
+  +--rw sonic-static-route
+     +--rw STATIC_ROUTE
+        +--rw STATIC_ROUTE_TEMPLATE_LIST* [prefix]
+        |  +--rw prefix       inet:ip-prefix
+        |  +--rw nexthop?     string
+        |  +--rw ifname?      string
+        |  +--rw advertise?   string
+        |  +--rw bfd?         string
+        +--rw STATIC_ROUTE_LIST* [vrf_name prefix]
+           +--rw vrf_name       union
+           +--rw prefix         inet:ip-prefix
+           +--rw nexthop?       string
+           +--rw ifname?        string
+           +--rw distance?      string
+           +--rw nexthop-vrf?   string
+           +--rw blackhole?     string
+
+module: sonic-storm-control
+  +--rw sonic-storm-control
+     +--rw PORT_STORM_CONTROL
+        +--rw PORT_STORM_CONTROL_LIST* [ifname storm_type]
+           +--rw ifname        -> /prt:sonic-port/PORT/PORT_LIST/name
+           +--rw storm_type    enumeration
+           +--rw kbps?         uint64
+
+module: sonic-stp
+  +--rw sonic-stp
+     +--rw STP
+     |  +--rw STP_LIST* [name]
+     |     +--rw name                 string
+     |     +--rw mode?                enumeration
+     |     +--rw rootguard_timeout?   uint16
+     |     +--rw forward_delay?       uint8
+     |     +--rw hello_time?          uint8
+     |     +--rw max_age?             uint8
+     |     +--rw priority?            uint16
+     +--rw STP_VLAN
+     |  +--rw STP_VLAN_LIST* [if_name]
+     |     +--rw if_name          -> /svlan:sonic-vlan/VLAN/VLAN_LIST/name
+     |     +--rw forward_delay?   uint8
+     |     +--rw hello_time?      uint8
+     |     +--rw max_age?         uint8
+     |     +--rw priority?        uint16
+     |     +--rw enabled?         boolean
+     +--rw STP_VLAN_PORT
+     |  +--rw STP_VLAN_PORT_LIST* [name ifname]
+     |     +--rw name         -> /svlan:sonic-vlan/VLAN/VLAN_LIST/name
+     |     +--rw ifname       union
+     |     +--rw path_cost?   uint32
+     |     +--rw priority?    uint8
+     +--rw STP_PORT
+        +--rw STP_PORT_LIST* [ifname]
+           +--rw ifname                   union
+           +--rw enabled?                 boolean
+           +--rw root_guard?              boolean
+           +--rw bpdu_guard?              boolean
+           +--rw bpdu_guard_do_disable?   boolean
+           +--rw path_cost?               uint32
+           +--rw priority?                uint8
+           +--rw portfast?                boolean
+           +--rw uplink_fast?             boolean
+
+module: sonic-syslog
+  +--rw sonic-syslog
+     +--rw SYSLOG_SERVER
+     |  +--rw SYSLOG_SERVER_LIST* [server_address]
+     |     +--rw server_address    inet:host
+     |     +--rw source?           inet:ip-address
+     |     +--rw port?             inet:port-number
+     |     +--rw vrf?              union
+     |     +--rw filter?           syslog-filter-type
+     |     +--rw filter_regex?     string
+     |     +--rw protocol?         rsyslog-protocol
+     |     +--rw severity?         rsyslog-severity
+     +--rw SYSLOG_CONFIG
+     |  +--rw GLOBAL
+     |     +--rw rate_limit_interval?   syslog-rate-limit-interval
+     |     +--rw rate_limit_burst?      syslog-rate-limit-burst
+     |     +--rw format?                log-format
+     |     +--rw welf_firewall_name?    string
+     |     +--rw severity?              rsyslog-severity
+     +--rw SYSLOG_CONFIG_FEATURE
+        +--rw SYSLOG_CONFIG_FEATURE_LIST* [service]
+           +--rw service                -> /feature:sonic-feature/FEATURE/FEATURE_LIST/name
+           +--rw rate_limit_interval?   syslog-rate-limit-interval
+           +--rw rate_limit_burst?      syslog-rate-limit-burst
+
+module: sonic-system-aaa
+  +--rw sonic-system-aaa
+     +--rw AAA
+        +--rw AAA_LIST* [type]
+           +--rw type           enumeration
+           +--rw login?         string
+           +--rw failthrough?   stypes:boolean_type
+           +--rw fallback?      stypes:boolean_type
+           +--rw debug?         stypes:boolean_type
+           +--rw trace?         stypes:boolean_type
+
+module: sonic-system-defaults
+  +--rw sonic-system-defaults
+     +--rw SYSTEM_DEFAULTS
+        +--rw SYSTEM_DEFAULTS_LIST* [name]
+           +--rw name      string
+           +--rw status?   stypes:admin_mode
+
+module: sonic-system-ldap
+  +--rw sonic-system-ldap
+     +--rw LDAP_SERVER
+     |  +--rw LDAP_SERVER_LIST* [hostname]
+     |     +--rw hostname    inet:host
+     |     +--rw priority?   uint8
+     +--rw LDAP
+        +--rw global
+           +--rw bind_dn?         string
+           +--rw bind_password?   string
+           +--rw bind_timeout?    uint16
+           +--rw version?         uint16
+           +--rw base_dn?         string
+           +--rw port?            inet:port-number
+           +--rw timeout?         uint16
+
+module: sonic-system-port
+  +--rw sonic-system-port
+     +--rw SYSTEM_PORT
+        +--rw SYSTEM_PORT_LIST* [hostname asic_name ifname]
+           +--rw hostname           stypes:hostname
+           +--rw asic_name          string
+           +--rw ifname             union
+           +--rw core_index?        uint8
+           +--rw core_port_index?   uint16
+           +--rw num_voq?           uint8
+           +--rw speed?             uint32
+           +--rw switch_id?         uint16
+           +--rw system_port_id?    uint32
+
+module: sonic-system-radius
+  +--rw sonic-system-radius
+     +--rw RADIUS
+     |  +--rw global
+     |     +--rw passkey?      string
+     |     +--rw auth_type?    auth_type_enumeration
+     |     +--rw src_ip?       inet:ip-address
+     |     +--rw nas_ip?       inet:ip-address
+     |     +--rw statistics?   boolean
+     |     +--rw timeout?      uint16
+     |     +--rw retransmit?   uint8
+     +--rw RADIUS_SERVER
+        +--rw RADIUS_SERVER_LIST* [ipaddress]
+           +--rw ipaddress     inet:host
+           +--rw auth_port?    inet:port-number
+           +--rw passkey?      string
+           +--rw auth_type?    auth_type_enumeration
+           +--rw priority?     uint8
+           +--rw timeout?      uint16
+           +--rw retransmit?   uint8
+           +--rw vrf?          string
+           +--rw src_intf?     union
+
+module: sonic-system-tacacs
+  +--rw sonic-system-tacacs
+     +--rw TACPLUS_SERVER
+     |  +--rw TACPLUS_SERVER_LIST* [ipaddress]
+     |     +--rw ipaddress    inet:host
+     |     +--rw priority?    uint8
+     |     +--rw tcp_port?    inet:port-number
+     |     +--rw timeout?     uint16
+     |     +--rw auth_type?   auth_type_enumeration
+     |     +--rw passkey?     string
+     |     +--rw vrf?         string
+     +--rw TACPLUS
+        +--rw global
+           +--rw auth_type?   auth_type_enumeration
+           +--rw timeout?     uint16
+           +--rw passkey?     string
+           +--rw src_intf?    union
+
+module: sonic-tc-dot1p-map
+  +--rw sonic-tc-dot1p-map
+     +--rw TC_TO_DOT1P_MAP
+        +--rw TC_TO_DOT1P_MAP_LIST* [name]
+           +--rw name               string
+           +--rw TC_TO_DOT1P_MAP* [tc]
+              +--rw tc       stypes:tc_type
+              +--rw dot1p?   string
+
+module: sonic-tc-dscp-map
+  +--rw sonic-tc-dscp-map
+     +--rw TC_TO_DSCP_MAP
+        +--rw TC_TO_DSCP_MAP_LIST* [name]
+           +--rw name              string
+           +--rw TC_TO_DSCP_MAP* [tc]
+              +--rw tc      stypes:tc_type
+              +--rw dscp?   string
+
+module: sonic-tc-priority-group-map
+  +--rw sonic-tc-priority-group-map
+     +--rw TC_TO_PRIORITY_GROUP_MAP
+        +--rw TC_TO_PRIORITY_GROUP_MAP_LIST* [name]
+           +--rw name                        string
+           +--rw TC_TO_PRIORITY_GROUP_MAP* [tc]
+              +--rw tc    stypes:tc_type
+              +--rw pg?   string
+
+module: sonic-tc-queue-map
+  +--rw sonic-tc-queue-map
+     +--rw TC_TO_QUEUE_MAP
+        +--rw TC_TO_QUEUE_MAP_LIST* [name]
+           +--rw name               string
+           +--rw TC_TO_QUEUE_MAP* [tc]
+              +--rw tc        stypes:tc_type
+              +--rw qindex?   string
+
+module: sonic-telemetry
+  +--rw sonic-telemetry
+     +--rw TELEMETRY
+        +--rw certs
+        |  +--rw ca_crt?       string
+        |  +--rw server_crt?   string
+        |  +--rw server_key?   string
+        +--rw gnmi
+           +--rw client_auth?   boolean
+           +--rw log_level?     uint8
+           +--rw port?          inet:port-number
+
+module: sonic-telemetry_client
+  +--rw sonic-telemetry_client
+     +--rw TELEMETRY_CLIENT
+        +--rw Global
+        |  +--rw retry_interval?   uint64
+        |  +--rw src_ip?           inet:ip-address
+        |  +--rw encoding?         encoding
+        |  +--rw unidirectional?   boolean
+        +--rw TELEMETRY_CLIENT_LIST* [prefix name]
+           +--rw prefix             string
+           +--rw name               string
+           +--rw dst_addr?          ipv4-port
+           +--rw dst_group?         string
+           +--rw path_target?       path_target
+           +--rw paths?             string
+           +--rw report_interval?   uint64
+           +--rw report_type?       report-type
+
+module: sonic-tunnel
+  +--rw sonic-tunnel
+     +--rw TUNNEL
+        +--rw TUNNEL_LIST* [mux_tunnel]
+           +--rw mux_tunnel               string
+           +--rw dscp_mode?               string
+           +--rw src_ip?                  -> /ps:sonic-peer-switch/PEER_SWITCH/PEER_SWITCH_LIST/address_ipv4
+           +--rw dst_ip?                  inet:ipv4-address
+           +--rw ecn_mode?                string
+           +--rw encap_ecn_mode?          string
+           +--rw ttl_mode?                string
+           +--rw tunnel_type?             string
+           +--rw decap_dscp_to_tc_map?    string
+           +--rw decap_tc_to_pg_map?      string
+           +--rw encap_tc_to_dscp_map?    string
+           +--rw encap_tc_to_queue_map?   string
+
+module: sonic-versions
+  +--rw sonic-versions
+     +--rw VERSIONS
+        +--rw DATABASE
+           +--rw VERSION?   string
+
+module: sonic-vlan-stacking
+  +--rw sonic-vlan-stacking
+     +--rw VLAN_STACKING
+        +--rw VLAN_STACKING_LIST* [port stage vlanid]
+           +--rw port        union
+           +--rw stage       string
+           +--rw vlanid      uint16
+           +--rw action?     string
+           +--rw s_vlanid?   uint16
+
+module: sonic-vlan-sub-interface
+  +--rw sonic-vlan-sub-interface
+     +--rw VLAN_SUB_INTERFACE
+        +--rw VLAN_SUB_INTERFACE_LIST* [name]
+        |  +--rw name               string
+        |  +--rw admin_status?      stypes:admin_status
+        |  +--rw vrf_name?          -> /vrf:sonic-vrf/VRF/VRF_LIST/name
+        |  +--rw loopback_action?   stypes:loopback_action
+        |  +--rw vlan?              uint16
+        +--rw VLAN_SUB_INTERFACE_IPPREFIX_LIST* [name ip-prefix]
+           +--rw name         -> ../../VLAN_SUB_INTERFACE_LIST/name
+           +--rw ip-prefix    stypes:sonic-ip-prefix
+
+module: sonic-vlan
+  +--rw sonic-vlan
+     +--rw VLAN_INTERFACE
+     |  +--rw VLAN_INTERFACE_LIST* [name]
+     |  |  +--rw name                        -> /sonic-vlan/VLAN/VLAN_LIST/name
+     |  |  +--rw vrf_name?                   -> /vrf:sonic-vrf/VRF/VRF_LIST/name
+     |  |  +--rw nat_zone?                   uint8
+     |  |  +--rw mpls?                       enumeration
+     |  |  +--rw grat_arp?                   string
+     |  |  +--rw proxy_arp?                  string
+     |  |  +--rw arp_reply?                  stypes:arp_reply
+     |  |  +--rw ipv6_use_link_local_only?   stypes:mode-status
+     |  |  +--rw loopback_action?            stypes:loopback_action
+     |  +--rw VLAN_INTERFACE_IPPREFIX_LIST* [name ip-prefix]
+     |     +--rw name         -> /sonic-vlan/VLAN/VLAN_LIST/name
+     |     +--rw ip-prefix    union
+     |     +--rw scope?       enumeration
+     |     +--rw family?      stypes:ip-family
+     |     +--rw secondary?   boolean
+     +--rw VLAN
+     |  +--rw VLAN_LIST* [name]
+     |     +--rw name                          string
+     |     +--rw vlanid?                       uint16
+     |     +--rw alias?                        string
+     |     +--rw description?                  string
+     |     +--rw dhcp_servers*                 inet:ip-address
+     |     +--rw dhcpv6_servers*               inet:ipv6-address
+     |     +--rw mtu?                          uint16
+     |     +--rw dhcp_relay_max_packet_size?   uint16
+     |     +--rw dhcp_relay_link_selection?    string
+     |     +--rw dhcp_relay_server_override?   string
+     |     +--rw dhcp_relay_src_intf?          union
+     |     +--rw dhcp_relay_server_vrf?        -> /vrf:sonic-vrf/VRF/VRF_LIST/name
+     |     +--rw dhcp_relay_primary_address?   inet:ip-address
+     |     +--rw admin_status?                 stypes:admin_status
+     |     +--rw mac?                          yang:mac-address
+     |     +--rw dhcp_suppress?                boolean
+     +--rw VLAN_MEMBER
+        +--rw VLAN_MEMBER_LIST* [name port]
+           +--rw name            -> /sonic-vlan/VLAN/VLAN_LIST/name
+           +--rw port            union
+           +--rw tagging_mode    stypes:vlan_tagging_mode
+
+module: sonic-vnet
+  +--rw sonic-vnet
+     +--rw VNET
+        +--rw VNET_LIST* [name]
+           +--rw name                string
+           +--rw vxlan_tunnel        -> /svxlan:sonic-vxlan/VXLAN_TUNNEL/VXLAN_TUNNEL_LIST/name
+           +--rw vni                 stypes:vnid_type
+           +--rw peer_list?          string
+           +--rw guid?               string
+           +--rw scope?              string
+           +--rw advertise_prefix?   boolean
+           +--rw overlay_dmac?       yang:mac-address
+           +--rw src_mac?            yang:mac-address
+
+module: sonic-voq-inband-interface
+  +--rw sonic-voq-inband-interface
+     +--rw VOQ_INBAND_INTERFACE
+        +--rw VOQ_INBAND_INTERFACE_LIST* [name]
+        |  +--rw name           string
+        |  +--rw inband_type?   string
+        +--rw VOQ_INBAND_INTERFACE_IPPREFIX_LIST* [name ip-prefix]
+           +--rw name         -> ../../VOQ_INBAND_INTERFACE_LIST/name
+           +--rw ip-prefix    stypes:sonic-ip-prefix
+
+module: sonic-vrf
+  +--rw sonic-vrf
+     +--rw VRF
+        +--rw VRF_LIST* [name]
+           +--rw name                 string
+           +--rw fallback?            boolean
+           +--rw vni?                 uint32
+           +--rw enable_link_local?   string
+
+module: sonic-vxlan
+  +--rw sonic-vxlan
+     +--rw VXLAN_TUNNEL
+     |  +--rw VXLAN_TUNNEL_LIST* [name]
+     |     +--rw name      string
+     |     +--rw src_ip?   inet:ip-address
+     +--rw VXLAN_TUNNEL_MAP
+     |  +--rw VXLAN_TUNNEL_MAP_LIST* [name mapname]
+     |     +--rw name       -> /sonic-vxlan/VXLAN_TUNNEL/VXLAN_TUNNEL_LIST/name
+     |     +--rw mapname    string
+     |     +--rw vlan       string
+     |     +--rw vni        stypes:vnid_type
+     +--rw VXLAN_EVPN_NVO
+        +--rw VXLAN_EVPN_NVO_LIST* [name]
+           +--rw name           string
+           +--rw source_vtep    -> /sonic-vxlan/VXLAN_TUNNEL/VXLAN_TUNNEL_LIST/name
+
+module: sonic-warm-restart
+  +--rw sonic-warm-restart
+     +--rw WARM_RESTART
+        +--rw WARM_RESTART_LIST* [module]
+           +--rw module              module-name
+           +--rw bgp_eoiu?           boolean
+           +--rw bgp_timer?          uint16
+           +--rw teamsyncd_timer?    uint16
+           +--rw neighsyncd_timer?   uint16
+
+module: sonic-wred-profile
+  +--rw sonic-wred-profile
+     +--rw WRED_PROFILE
+        +--rw WRED_PROFILE_LIST* [name]
+           +--rw name                           string
+           +--rw yellow_min_threshold?          uint64
+           +--rw green_min_threshold?           uint64
+           +--rw red_min_threshold?             uint64
+           +--rw yellow_max_threshold?          uint64
+           +--rw green_max_threshold?           uint64
+           +--rw red_max_threshold?             uint64
+           +--rw ecn?                           enumeration
+           +--rw wred_green_enable?             boolean
+           +--rw wred_yellow_enable?            boolean
+           +--rw wred_red_enable?               boolean
+           +--rw yellow_drop_probability?       uint64
+           +--rw green_drop_probability?        uint64
+           +--rw red_drop_probability?          uint64
+           +--rw ecn_yellow_min_threshold?      uint64
+           +--rw ecn_green_min_threshold?       uint64
+           +--rw ecn_red_min_threshold?         uint64
+           +--rw ecn_yellow_max_threshold?      uint64
+           +--rw ecn_green_max_threshold?       uint64
+           +--rw ecn_red_max_threshold?         uint64
+           +--rw ecn_yellow_mark_probability?   uint64
+           +--rw ecn_green_mark_probability?    uint64
+           +--rw ecn_red_mark_probability?      uint64

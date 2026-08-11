@@ -1,0 +1,37 @@
+module sonic-cmd-exec {
+  namespace "http://github.com/Azure/sonic-cmd-exec";
+  prefix cmdexec;
+
+  organization
+    "SONiC";
+  contact
+    "SONiC";
+  description
+    "SONIC CMD EXECUTE";
+
+  revision 2021-08-03 {
+    description
+      "Initial revision.";
+  }
+
+
+  rpc execute-cmd {
+
+    description "RPC for executing cmds.";
+
+    input {
+        leaf cmds {
+                type string;
+                description
+                    "executing system command via rpc";
+        }
+    }
+
+    output {
+        leaf status {
+            type string;
+            description "The status of the operation execution request.";
+        }
+    }
+  }
+}

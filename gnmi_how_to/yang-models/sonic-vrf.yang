@@ -1,0 +1,87 @@
+module sonic-vrf {
+    namespace "http://github.com/Azure/sonic-vrf";
+    prefix vrf;
+
+    import sonic-common {
+        prefix scommon;
+    }
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC VRF";
+
+    revision 2019-10-30 {
+        description
+            "Initial revision.";
+    }
+
+    revision 2019-11-22 {
+        description
+            "Add VRF name check";
+    }
+
+    container sonic-vrf {
+        container VRF {
+            description "Vrf configuration.";
+
+            list VRF_LIST {
+                key "vrf_name";
+
+                leaf vrf_name {
+                    type string {
+                        pattern "Vrf[a-zA-Z0-9_-]+" {
+                            error-message "Invalid VRF name";
+                            error-app-tag vrf-name-invalid;
+                        }
+                    }
+                }
+
+                leaf vni {
+                sonic-ext:custom-validation ValidateVrfVNI;
+                    type uint32 {
+                        range "0..16777215" {
+                            error-message "VNI ID out of range";
+                            error-app-tag vnid-invalid;
+                        }
+                    }
+                    description
+                        "VNI mapped to VRF";
+                }
+            }
+        }
+
+        container MGMT_VRF_CONFIG {
+            description "Management vrf configuration.";
+
+            list MGMT_VRF_CONFIG_LIST {
+                key "mgmt_vrf_name";
+
+                leaf mgmt_vrf_name {
+                    type string {
+                        pattern "vrf_global" {
+                            error-message "Error: Invalid mgmt vrf name";
+                        }
+                    }
+                }
+
+                leaf mgmtVrfEnabled {
+                    type boolean;
+                    sonic-ext:custom-validation ValidateMgmtVrfEnabledCheck;
+                }
+
+                leaf in_band_mgmt_enabled {
+                    type boolean;
+                    sonic-ext:custom-validation ValidateInBandMgmtCheck;
+                }
+            }
+        }
+    }
+}

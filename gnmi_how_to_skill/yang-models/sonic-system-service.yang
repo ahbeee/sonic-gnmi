@@ -1,0 +1,28 @@
+module sonic-system-service {
+    namespace "http://github.com/Azure/sonic-system-service";
+    prefix sss;
+
+    organization
+        "SONiC";
+    contact
+        "SONiC";
+    description
+        "SONIC system service managemant";
+    revision 2021-02-08 {
+        description "Initial version.";
+    }
+    rpc restart {
+        input {
+            leaf service {
+                type string;
+            }
+        }
+        output {
+            leaf status {
+                type string;
+                description "The status of the operation execution request.";
+            }
+        }
+    }
+}
+

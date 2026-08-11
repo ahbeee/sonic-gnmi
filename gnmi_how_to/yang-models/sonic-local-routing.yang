@@ -1,0 +1,62 @@
+module sonic-local-routing {
+	namespace "http://github.com/Azure/sonic-local-routing";
+	prefix s-loc-rt;
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+    import ietf-inet-types {
+		prefix inet;
+	}
+	/* import openconfig-interfaces {
+		 prefix oc-if;
+	}*/
+	organization
+		"SONiC";
+
+	contact
+		"SONiC";
+
+	description
+		"SONIC INTERFACE";
+
+	revision 2020-05-28 {
+		description
+			"Initial revision.";
+	}
+
+	container sonic-local-routing {
+		container STATIC_ROUTE {
+			list STATIC_ROUTE_LIST {
+				key "vrf prefix";
+				max-elements 512;
+
+				leaf vrf {
+					type string {
+						pattern "default|mgmt|Vrf[a-zA-Z0-9_-]+" {
+							error-message "Invalid VRF name";
+							error-app-tag vrf-name-invalid;
+						}
+					}
+				}
+
+				leaf prefix {
+					type inet:ip-prefix;
+					sonic-ext:custom-validation ValidatePrefix;
+				}
+				leaf ifname {
+					type string;
+				}
+				leaf nexthop {
+					type string;
+					sonic-ext:custom-validation ValidateNexthop;
+				}
+				leaf distance {
+					type string;
+				}
+				leaf nexthop-vrf {
+					type string;
+				}
+			}
+		}
+	}
+}

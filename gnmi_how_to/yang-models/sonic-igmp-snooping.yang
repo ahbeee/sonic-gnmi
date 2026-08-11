@@ -1,0 +1,224 @@
+module sonic-igmp-snooping {
+    namespace "http://github.com/Azure/sonic-igmp-snooping";
+    prefix igmpsnp;
+    yang-version 1.1;
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    import sonic-vlan {
+        prefix svlan;
+    }
+
+    import sonic-port {
+        prefix prt;
+    }
+
+    import sonic-portchannel {
+        prefix spc;
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC IGMP SNOOPING";
+
+    revision 2022-01-24 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-igmp-snooping {
+
+        container IGMP_SNP {
+
+            list IGMP_SNP_LIST {
+                key "name";
+
+                leaf name {
+                    type enumeration {
+                        enum Global;
+                    }
+                }
+
+                leaf admin_status {
+                    type enumeration {
+                        enum enabled;
+                        enum disabled;
+                    }
+                }
+
+                leaf mrouter_forward_mode {
+                    type enumeration {
+                        enum dynamic;
+                        enum forward;
+                    }
+                }
+
+                leaf querier {
+                    type enumeration {
+                        enum enabled;
+                        enum disabled;
+                    }
+                }
+
+                leaf router_port_expire_time {
+                    type uint16 {
+                        range "1..65535" {
+                            error-message "Time interval of router port expire time out of range";
+                            error-app-tag invalid;
+                        }
+                    }
+                }
+
+                leaf version {
+                    type uint8 {
+                        range "1..3" {
+                            error-message "version out of range";
+                            error-app-tag invalid;
+                        }
+                    }
+                }
+            }
+        }
+
+        container IGMP_SNP_VLAN {
+
+            list IGMP_SNP_VLAN_LIST {
+                key "vlanName";
+                sonic-ext:custom-validation ValidateExistVlan;
+
+                leaf vlanName{
+                    type leafref {
+                        path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                    }
+                }
+
+                leaf admin_status {
+                    type enumeration {
+                        enum enabled;
+                        enum disabled;
+                    }
+                }
+
+                leaf immediate_leave {
+                    type enumeration {
+                        enum enabled;
+                        enum disabled;
+                    }
+                }
+
+                leaf last_memb_query_count {
+                    type uint8 {
+                        range "1..255" {
+                            error-message "Last member query count out of range";
+                            error-app-tag invalid;
+                        }
+                    }
+                }
+
+                leaf last_memb_query_intvl {
+                    type uint16 {
+                        range "1..31744" {
+                            error-message "Last member query interval out of range";
+                            error-app-tag invalid;
+                        }
+                    }
+                }
+
+                leaf querier_interval {
+                    sonic-ext:custom-validation ValidateQueryAndRespIntvl;
+                    type uint16 {
+                        range "2..31744" {
+                            error-message "Query interval out of range";
+                            error-app-tag invalid;
+                        }
+                    }
+                }
+
+                leaf querier_resp_intvl {
+                    sonic-ext:custom-validation ValidateQueryAndRespIntvl;
+                    type uint16 {
+                        range "10..31740" {
+                            error-message "Query response interval out of range";
+                            error-app-tag invalid;
+                        }
+                    }
+                }
+
+                leaf version {
+                    type uint8 {
+                        range "1..3" {
+                            error-message "version out of range";
+                            error-app-tag invalid;
+                        }
+                    }
+                }
+            }
+        }
+
+        container IGMP_SNP_VLAN_MROUTER {
+
+            list IGMP_SNP_VLAN_MROUTER_LIST {
+                key "vlanName ifName";
+                sonic-ext:custom-validation ValidateVlanMrouter;
+
+                leaf vlanName{
+                    type leafref {
+                        path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                    }
+                }
+
+                leaf ifName{
+                    type union {
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        type leafref {
+                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+                        }
+                    }
+                }
+            }
+        }
+
+        container IGMP_SNP_VLAN_STATIC {
+
+            list IGMP_SNP_VLAN_STATIC_LIST {
+                key "vlanName ip_address ifName";
+                max-elements 64;       //Golbal: IGMPSNP_STATIC_GROUP_ENTRY_MAX
+                sonic-ext:custom-validation ValidateVlanStaticGroup;
+
+                leaf vlanName{
+                    type leafref {
+                        path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                    }
+                }
+
+                leaf ip_address{
+                    type inet:ipv4-address;
+                }
+
+                leaf ifName{
+                    type union {
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        type leafref {
+                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

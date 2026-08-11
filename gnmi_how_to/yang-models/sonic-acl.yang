@@ -1,0 +1,376 @@
+module sonic-acl {
+	namespace "http://github.com/Azure/sonic-acl";
+	prefix acl;
+	yang-version 1.1;
+
+	import ietf-inet-types {
+		prefix inet;
+	}
+
+	import sonic-port {
+		prefix prt;
+	}
+
+	import sonic-mirror {
+		prefix smir;
+	}
+
+	import sonic-extension {
+        prefix sonic-ext;
+    }
+
+	organization
+		"SONiC";
+
+	contact
+		"SONiC";
+
+	description
+		"SONIC ACL";
+
+	revision 2019-05-15 {
+		description
+			"Initial revision.";
+	}
+
+	container sonic-acl {
+
+		container ACL_TABLE {
+
+			list ACL_TABLE_LIST {
+				key "aclname";
+				sonic-ext:custom-validation ValidateAclTable;
+
+				leaf aclname {
+					type string {
+						pattern '[.a-zA-Z0-9]{1}([-a-zA-Z0-9_]{1,63})' {
+							error-app-tag aclname-invalid;
+						}
+					}
+				}
+
+				leaf policy_desc {
+					type string {
+						length 1..255 {
+							error-app-tag policy-desc-invalid-length;
+						}
+					}
+				}
+
+				leaf stage {
+					type string {
+						pattern "ingress|egress|INGRESS|EGRESS";
+					}
+					default "INGRESS";
+				}
+
+				leaf type {
+					type string;
+					//pattern "MIRROR|MIRRORV6|L3|L3V6|MIRROR_DSCP|CTRLPLANE";
+					sonic-ext:custom-validation ValidateAclTableSetType;
+				}
+
+				leaf-list ports {
+					type leafref {
+						path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+					}
+					sonic-ext:custom-validation ValidateAclTablePorts;
+				}
+
+				leaf-list services {
+					type string;
+				}
+				/* Validating 'services' exist if ACL type is 'CTRLPLANE' */
+				must "(not(type = 'CTRLPLANE')) or (boolean(services))";
+			}
+		}
+
+		container ACL_RULE {
+
+			list ACL_RULE_LIST {
+				key "aclname rulename";
+				sonic-ext:custom-validation ValidateAclRule;
+
+				leaf aclname {
+					type leafref {
+						path "../../../ACL_TABLE/ACL_TABLE_LIST/aclname";
+					}
+					sonic-ext:custom-validation ValidateCoPPAclRule;
+				}
+
+				leaf rulename {
+					type string {
+						pattern '[a-zA-Z0-9]{1}([-a-zA-Z0-9_]{1,15})' {
+							error-app-tag rulename-invalid;
+						}
+					}
+				}
+
+				leaf PRIORITY {
+					type uint16 {
+						range "1..10000"{
+							error-app-tag priority-invalid-range;
+							error-message "Invalid ACL rule priority.";
+						}
+					}
+					sonic-ext:custom-validation ValidateAclRulePriority;
+				}
+
+				leaf RULE_DESCRIPTION {
+					type string {
+						length 1..255 {
+							error-app-tag ruledesc-invalid-length;
+						}
+					}
+				}
+
+				leaf PACKET_ACTION {
+					type string {
+						pattern "FORWARD|ACCEPT|DROP|REDIRECT";
+					}
+					sonic-ext:custom-validation ValidateAclRuleAction;
+				}
+
+				leaf VLAN_ID {
+					type uint16 {
+						range "1..4094";
+					}
+					sonic-ext:custom-validation ValidateAclRuleVlanId;
+				}
+
+				leaf VLAN_PRI {
+					type uint8 {
+						range "0..7";
+					}
+					sonic-ext:custom-validation ValidateAclRuleVlanPri;
+				}
+
+				leaf IP_TYPE {
+					type string {
+						pattern "IP|IPV4ANY|IPV6ANY";
+						//pattern "ANY|IP|IPV4|IPV4ANY|NON_IPV4|IPV6ANY|NON_IPV6";
+					}
+					sonic-ext:custom-validation ValidateAclRuleIpType;
+				}
+
+				leaf IP_PROTOCOL {
+					type uint8 {
+						range "0..255";
+					}
+					sonic-ext:custom-validation ValidateAclRuleIpProto;
+				}
+
+				leaf NEXT_HEADER {
+					type uint8 {
+						range "0..255";
+					}
+					sonic-ext:custom-validation ValidateAclRuleNextHeader;
+				}
+
+				leaf ETHER_TYPE {
+					type string {
+						pattern "(35020)|(33024)|(35093)|(2054)|(2048)|(34525)|(34887)" {
+							error-message "Invalid ACL Rule Ether Type";
+							error-app-tag ether-type-invalid;
+						}
+					}
+					sonic-ext:custom-validation ValidateAclRuleEthType;
+				}
+
+				choice ip_src_dst {
+					case ipv4_src_dst {
+						leaf SRC_IP {
+							type union {
+								type inet:ipv4-prefix;
+								type inet:ipv4-address;
+							}
+							sonic-ext:custom-validation ValidateAclRuleIpv4Src;
+						}
+						leaf DST_IP {
+							type inet:ipv4-prefix;
+							sonic-ext:custom-validation ValidateAclRuleIpv4Dst;
+						}
+					}
+					case ipv6_src_dst {
+						leaf SRC_IPV6 {
+							type union {
+								type inet:ipv6-prefix;
+								type inet:ipv6-address;
+							}
+							sonic-ext:custom-validation ValidateAclRuleIpv6Src;
+						}
+						leaf DST_IPV6 {
+							type inet:ipv6-prefix;
+							sonic-ext:custom-validation ValidateAclRuleIpv6Dst;
+						}
+					}
+				}
+
+				choice src_port {
+					case l4_src_port {
+						leaf L4_SRC_PORT {
+							type inet:port-number;
+							sonic-ext:custom-validation ValidateAclRuleL4SrcPort;
+						}
+					}
+					case l4_src_port_range {
+						leaf L4_SRC_PORT_RANGE {
+							type string {
+								pattern "[0-9]{1,5}(-)[0-9]{1,5}" {
+									error-app-tag src-port-range-invalid;
+								}
+							}
+							sonic-ext:custom-validation ValidateAclRuleL4SrcPortRange;
+						}
+					}
+				}
+
+				choice dst_port {
+					case l4_dst_port {
+						leaf L4_DST_PORT {
+							type inet:port-number;
+							sonic-ext:custom-validation ValidateAclRuleL4DstPort;
+						}
+					}
+					case l4_dst_port_range {
+						leaf L4_DST_PORT_RANGE {
+							type string {
+								pattern "[0-9]{1,5}(-)[0-9]{1,5}" {
+									error-app-tag dst-port-range-invalid;
+								}
+							}
+							sonic-ext:custom-validation ValidateAclRuleL4DstPortRange;
+						}
+					}
+				}
+
+				leaf TCP_FLAGS {
+					type string {
+						pattern "0[xX][0-9a-fA-F]{2}[/]0[xX][0-9a-fA-F]{2}" {
+							error-app-tag tcp-flag-invalid;
+						}
+					}
+					sonic-ext:custom-validation ValidateAclRuleTcpFlags;
+				}
+
+				leaf ICMP_TYPE {
+					type uint8 {
+						range "0..255";
+					}
+					sonic-ext:custom-validation ValidateAclRuleIcmpType;
+				}
+
+				leaf ICMP_CODE {
+					type uint8 {
+						range "0..255";
+					}
+					sonic-ext:custom-validation ValidateAclRuleIcmpCode;
+				}
+
+				leaf ICMPV6_TYPE {
+					type uint8 {
+						range "0..255";
+					}
+					sonic-ext:custom-validation ValidateAclRuleIcmpv6Type;
+				}
+
+				leaf ICMPV6_CODE {
+					type uint8 {
+						range "0..255";
+					}
+					sonic-ext:custom-validation ValidateAclRuleIcmpv6Code;
+				}
+
+				choice in_port {
+					case in_ports {
+						leaf IN_PORTS {
+							type string;
+							sonic-ext:custom-validation ValidateAclRuleInPorts;
+						}
+					}
+					case in_port {
+						leaf IN_PORT {
+							type leafref {
+								path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+							}
+							sonic-ext:custom-validation ValidateAclRuleInPort;
+						}
+					}
+				}
+
+				leaf OUT_PORT {
+					type leafref {
+						path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+					}
+					sonic-ext:custom-validation ValidateAclRuleOutPort;
+				}
+
+				leaf DSCP {
+					type inet:dscp;
+					sonic-ext:custom-validation ValidateAclRuleDscp;
+				}
+
+				leaf SET_DSCP {
+					type inet:dscp;
+					sonic-ext:custom-validation ValidateAclRuleSetDscp;
+				}
+
+				leaf SET_TC {
+					type uint8 {
+						range "0..7";
+					}
+					sonic-ext:custom-validation ValidateAclRuleSetTc;
+				}
+
+				leaf SET_COS {
+					type uint8 {
+						range "0..7";
+					}
+					sonic-ext:custom-validation ValidateAclRuleSetCos;
+				}
+
+				leaf MIRROR_INGRESS_ACTION {
+					type leafref {
+						path "/smir:sonic-mirror/smir:MIRROR_SESSION/smir:MIRROR_SESSION_LIST/smir:name";
+					}
+					sonic-ext:custom-validation ValidateAclRuleMirrorIgAction;
+				}
+			}
+		}
+
+		container ACL_TABLE_TYPE {
+
+			list ACL_TABLE_TYPE_LIST {
+				key "typename";
+				sonic-ext:custom-validation ValidateAclType;
+
+				leaf typename {
+					type string {
+						pattern '[a-zA-Z0-9]{1}([-a-zA-Z0-9_]{1,15})' {
+							error-app-tag typename-invalid;
+						}
+					}
+				}
+
+				leaf-list actions {
+					type string {
+						pattern "packet_action|set_policer";
+					}
+				}
+
+				leaf-list bind_points {
+					type string {
+						pattern "PORT|PORTCHANNEL";
+					}
+				}
+
+				leaf-list matches {
+					type string {
+						pattern "src_ip|dst_ip|src_ipv6|dst_ipv6|dscp|l4_src_port|l4_dst_port|vlan_id|vlan_pri|in_ports|in_port|out_port|ip_type";
+					}
+					sonic-ext:custom-validation ValidateAclTypeMatch;
+				}
+			}
+		}
+	}
+}

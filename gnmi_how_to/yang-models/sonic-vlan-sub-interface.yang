@@ -1,0 +1,107 @@
+module sonic-vlan-sub-interface {
+
+    yang-version 1.1;
+
+    namespace  "http://github.com/Azure/sonic-vlan-sub-interface";
+
+    prefix ssubintf;
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import sonic-port {
+        prefix port;
+    }
+
+    import sonic-portchannel {
+        prefix lag;
+    }
+
+    import sonic-vrf {
+        prefix vrf;
+    }
+
+
+    description "VLAN sub interface for SONiC OS";
+
+    revision 2021-11-11 {
+        description "Initial version";
+    }
+
+    container sonic-vlan-sub-interface {
+        container VLAN_SUB_INTERFACE {
+
+            description "VLAN SUB INTERFACE part of config_db.json";
+
+            list VLAN_SUB_INTERFACE_LIST {
+
+                description "VLAN_SUB_INTERFACE part of config_db.json with vrf";
+
+                key "name";
+                sonic-ext:custom-validation ValidateSubInterface;
+                leaf name {
+                    must "(string-length(current()) <= 15) and " +
+                         "((substring-before(current(), '.') = /port:sonic-port/port:PORT/port:PORT_LIST/port:ifname) or " +
+                         "(starts-with(substring-before(current(), '.'), 'Eth') and concat('Ethernet', substring-after(substring-before(current(), '.'), 'Eth')) = /port:sonic-port/port:PORT/port:PORT_LIST/port:ifname) or " +
+                         "(substring-before(current(), '.') = /lag:sonic-portchannel/lag:PORTCHANNEL/lag:PORTCHANNEL_LIST/lag:name) or " +
+                         "(starts-with(substring-before(current(), '.'), 'Po') and concat('PortChannel', substring-after(substring-before(current(), '.'), 'Po')) = /lag:sonic-portchannel/lag:PORTCHANNEL/lag:PORTCHANNEL_LIST/lag:name))"
+                    {
+                        error-message "Must condition not satisfied, please follow vlan sub interface naming convention";
+                    }
+
+                    // check if the vlan sub interface have the form as <portname>.<vlan_id>
+                    // the vlan_id should be chosen from range [1, 4094]
+                    type string {
+                        pattern '(\w+)\.([1-9][0-9]{0,2}|[1-3][0-9]{3}|[4][0][0-8][0-9]|[4][0][9][0-4])';
+                    }
+                }
+
+                leaf admin_status {
+                    type string {
+                      pattern "(up|down)";
+                    }
+                }
+
+                leaf vrf_name {
+                    type leafref {
+                        path "/vrf:sonic-vrf/vrf:VRF/vrf:VRF_LIST/vrf:vrf_name";
+                    }
+                }
+            }
+
+            list VLAN_SUB_INTERFACE_IPPREFIX_LIST {
+
+                description "VLAN_SUB_INTERFACE part of config_db.json with ipPrefix";
+                key "subifname ipPrefix";
+                sonic-ext:custom-validation ValidateSubInterfacePrefix;
+                leaf subifname {
+                    //build error if using leafref, subifname format follows VLAN_SUB_INTERFACE_LIST
+                    //type leafref {
+                    //    path "../../VLAN_SUB_INTERFACE_LIST/name";
+                    //}
+
+                    must "(string-length(current()) <= 15) and " +
+                         "((substring-before(current(), '.') = /port:sonic-port/port:PORT/port:PORT_LIST/port:ifname) or " +
+                         "(starts-with(substring-before(current(), '.'), 'Eth') and concat('Ethernet', substring-after(substring-before(current(), '.'), 'Eth')) = /port:sonic-port/port:PORT/port:PORT_LIST/port:ifname) or " +
+                         "(substring-before(current(), '.') = /lag:sonic-portchannel/lag:PORTCHANNEL/lag:PORTCHANNEL_LIST/lag:name) or " +
+                         "(starts-with(substring-before(current(), '.'), 'Po') and concat('PortChannel', substring-after(substring-before(current(), '.'), 'Po')) = /lag:sonic-portchannel/lag:PORTCHANNEL/lag:PORTCHANNEL_LIST/lag:name))"
+                    {
+                        error-message "Must condition not satisfied, please follow vlan sub interface naming convention";
+                    }
+                    type string {
+                        pattern '(\w+)\.([1-9][0-9]{0,2}|[1-3][0-9]{3}|[4][0][0-8][0-9]|[4][0][9][0-4])';
+                    }
+                }
+
+                leaf ipPrefix {
+                    type inet:ip-prefix;
+                }
+            }
+        }
+    }
+}

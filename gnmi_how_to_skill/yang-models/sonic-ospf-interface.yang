@@ -1,0 +1,117 @@
+module sonic-ospf-interface {
+    namespace "http://github.com/Azure/sonic-ospf-interface";
+    prefix sospfinterface;
+    yang-version 1.1;
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    import sonic-port {
+        prefix prt;
+    }
+
+    import sonic-vlan {
+        prefix svlan;
+    }
+
+    import sonic-portchannel {
+        prefix spc;
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    organization
+        "SONiC";
+
+    description
+        "SONIC OSPFv2 interface";
+
+    revision 2026-01-15 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-ospf-interface {
+        container OSPF_INTERFACE {
+            list OSPF_INTERFACE_LIST {
+                key "if_name";
+
+                leaf if_name {
+                    type union {
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        type leafref {
+                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+                        }
+                        type leafref {
+                            path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                        }
+                    }
+                }
+
+                leaf hello_interval {
+                    //range "1..65535", use 0 to clear
+                    type uint16{
+                        range "0..65535";
+                    }
+                }
+
+                leaf passive {
+                    type string {
+                        pattern "passive|global|no-passive";
+                    }
+                    default "global";
+                }
+
+                leaf-list passive_ip {
+                    //use 0.0.0.0 to clear
+                    type inet:ipv4-address;
+                }
+
+                leaf network {
+                    type string {
+                        pattern "broadcast|point-to-point";
+                    }
+                }
+            }
+        }
+
+        container OSPF_INTERFACE_AUTH {
+            list OSPF_INTERFACE_AUTH_LIST {
+                key "if_name message_digest_id";
+
+                leaf if_name {
+                    type union {
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        type leafref {
+                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+                        }
+                        type leafref {
+                            path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                        }
+                    }
+                }
+
+                leaf message_digest_id {
+                    type uint8 {
+                        range "1..255";
+                    }
+                }
+
+                leaf message_digest_key {
+                    type string {
+                        length 1..255;
+                    }
+                    mandatory true;
+                }
+            }
+        }
+
+    }
+}

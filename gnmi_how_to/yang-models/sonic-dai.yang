@@ -1,0 +1,99 @@
+module sonic-dai {
+    namespace "http://github.com/Azure/sonic-dai";
+    prefix sdai;
+    yang-version 1.1;
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    import sonic-vlan {
+        prefix svlan;
+    }
+
+    import sonic-port {
+        prefix prt;
+    }
+
+    import sonic-portchannel {
+        prefix spc;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC Dynamic ARP Inspection";
+
+    revision 2020-01-15 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-dai {
+
+        container DAI_VLAN {
+
+            list DAI_VLAN_LIST {
+                key "vlan_name";
+
+                leaf vlan_name {
+                    type leafref {
+                        path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                    }
+                }
+
+                leaf dai_state {
+                    type enumeration {
+                        enum enabled;
+                        enum disabled;
+                    }
+                }
+            }
+        }
+
+        container DAI_INTERFACE {
+
+            list DAI_INTERFACE_LIST {
+                key "port_name";
+                sonic-ext:custom-validation ValidateDAIintf;
+
+                leaf port_name {
+                    type union {
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        type leafref {
+                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+                        }
+                    }
+                }
+
+                leaf trust_state {
+                    type enumeration {
+                        enum trusted;
+                        enum untrusted;
+                    }
+                }
+
+                leaf rate_limit {
+                    type union {
+                        type uint16 {
+                            range "1..500" {
+                                error-message "Rate limit out of range";
+                                error-app-tag invalid;
+                            }
+                        }
+
+                        type string {
+                            pattern "none";
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

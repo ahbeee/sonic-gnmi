@@ -1,0 +1,79 @@
+module sonic-fdb {
+
+    yang-version 1.1;
+
+    namespace "http://github.com/Azure/sonic-fdb";
+    prefix fdb;
+
+    import ietf-yang-types {
+        prefix yang;
+    }
+    /* Comment sonic-vlan import here until libyang back-links issue is resolved for VLAN leaf reference.
+    import sonic-vlan{
+        prefix vlan;
+    }
+    */
+    import sonic-port{
+        prefix port;
+        revision-date 2019-07-01;
+    }
+
+    import sonic-portchannel {
+        prefix lag;
+    }
+
+
+    description "FDB yang Module for SONiC OS";
+
+    revision 2023-05-17 {
+        description "First Revision";
+    }
+
+    container sonic-fdb {
+
+        container FDB {
+            description "FDB part of config_db.json";
+
+            list FDB_LIST {
+                key "vlan_name mac-address";
+                /* Comment sonic-vlan import here until libyang back-links issue is resolved for VLAN leaf reference.                
+                leaf vlan_name {
+                    type leafref {
+                        path "/vlan:sonic-vlan/vlan:VLAN/vlan:VLAN_LIST/vlan:name";
+                    }
+                }
+                */
+
+                leaf vlan_name {
+                    type string {
+                        pattern 'Vlan([0-9]{1,3}|[1-3][0-9]{3}|[4][0][0-8][0-9]|[4][0][9][0-4])';
+                    }
+                }
+
+                leaf mac-address {
+                    type yang:mac-address;
+                }
+
+                leaf port {
+                    mandatory true;
+                    type union {
+                        type leafref {
+                            path "/port:sonic-port/port:PORT/port:PORT_LIST/port:name";
+                        }
+                        type leafref {
+                            path "/lag:sonic-portchannel/lag:PORTCHANNEL/lag:PORTCHANNEL_LIST/lag:name";
+                        }
+                    }
+                }
+
+                leaf type {
+                    description "static or dynamic for MAC address";
+                    type enumeration {
+                        enum static;
+                        enum dynamic;
+                    }
+                }
+            }
+        }
+    }
+} /* end of module sonic-fdb */

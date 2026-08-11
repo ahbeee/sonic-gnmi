@@ -1,0 +1,262 @@
+module sonic-stp {
+    namespace "http://github.com/Azure/sonic-stp";
+    prefix sstp;
+    yang-version 1.1;
+
+    import sonic-port {
+        prefix prt;
+    }
+
+    import sonic-portchannel {
+        prefix spc;
+    }
+
+    import sonic-vlan {
+        prefix svlan;
+    }
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC STP";
+
+    revision 2024-08-28 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-stp {
+
+        container STP {
+
+            list STP_LIST {
+                key "name";
+                unique "name";
+                leaf name {
+                    type string {
+                        pattern "GLOBAL";
+                    }
+                }
+                sonic-ext:custom-validation ValidateStpGlobalDisable;
+
+                leaf mode {
+                    type enumeration {
+                        enum pvst;
+                        enum rpvst;
+                    }
+                }
+
+                leaf rootguard_timeout {
+                    type uint16 {
+                        range "5..600" {
+                            error-message "%Error: STP root guard timeout must be in range 5-600.";
+                            error-app-tag rootguard-timeout-invalid;
+                        }
+                    }
+                }
+
+                leaf forward_delay {
+                    type uint8 {
+                        range "4..30" {
+                            error-message "%Error: STP forward delay value must be in range 4-30.";
+                            error-app-tag forward-delay-invalid;
+                        }
+                    }
+                }
+
+                leaf hello_time {
+                    type uint8 {
+                        range "1..10" {
+                            error-message "%Error: STP hello timer must be in range 1-10.";
+                            error-app-tag hello-time-invalid;
+                        }
+                    }
+                }
+
+                leaf max_age {
+                    type uint8 {
+                        range "6..40" {
+                            error-message "%Error: STP max age value must be in range 6-40.";
+                            error-app-tag max-age-invalid;
+                        }
+                    }
+                }
+
+                leaf priority {
+                    type uint16 {
+                        range "0..61440" {
+                            error-message "%Error: STP bridge priority must be in range 0-61440.";
+                            error-app-tag priority-invalid;
+                        }
+                    }
+                }
+            }
+        }
+
+        container STP_VLAN {
+
+            list STP_VLAN_LIST {
+                key "if_name";
+
+                leaf if_name {
+                    type leafref {
+                        path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                    }
+                }
+                sonic-ext:custom-validation ValidateStpVlan;
+
+                leaf forward_delay {
+                    type uint8 {
+                        range "4..30" {
+                            error-message "%Error: STP forward delay value must be in range 4-30.";
+                            error-app-tag forward-delay-invalid;
+                        }
+                    }
+                }
+
+                leaf hello_time {
+                    type uint8 {
+                        range "1..10" {
+                            error-message "%Error: STP hello timer must be in range 1-10.";
+                            error-app-tag hello-time-invalid;
+                        }
+                    }
+                }
+
+                leaf max_age {
+                    type uint8 {
+                        range "6..40" {
+                            error-message "%Error: STP max age value must be in range 6-40.";
+                            error-app-tag max-age-invalid;
+                        }
+                    }
+                }
+
+                leaf priority {
+                    type uint16 {
+                        range "0..61440" {
+                            error-message "%Error: STP bridge priority must be in range 0-61440.";
+                            error-app-tag priority-invalid;
+                        }
+                    }
+                }
+
+                leaf enabled {
+                    type boolean;
+                }
+            }
+        }
+
+        container STP_VLAN_PORT {
+
+            list STP_VLAN_PORT_LIST {
+                key "name ifname";
+
+                leaf name {
+                    type leafref {
+                        path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                    }
+                }
+
+                leaf ifname {
+                    type union {
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        type leafref {
+                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+                        }
+                    }
+                }
+                sonic-ext:custom-validation ValidateStpVlanPort;
+
+                leaf path_cost {
+                    type uint32 {
+                        range "1..200000000" {
+                            error-message "%Error: STP per vlan port path cost must be in range 1-200000000";
+                            error-app-tag path-cost-invalid;
+                        }
+                    }
+                }
+
+                leaf priority {
+                    type uint8 {
+                        range "0..240" {
+                            error-message "%Error: STP per vlan port priority must be in range 0-240.";
+                            error-app-tag priority-invalid;
+                        }
+                    }
+                }
+            }
+        }
+
+        container STP_PORT {
+
+            list STP_PORT_LIST {
+                key "ifname";
+
+                leaf ifname {
+                    type union {
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        type leafref {
+                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+                        }
+                    }
+                }
+                sonic-ext:custom-validation ValidateStpPort;
+
+                leaf enabled {
+                    type boolean;
+                }
+
+                leaf root_guard {
+                    type boolean;
+                }
+
+                leaf bpdu_guard {
+                    type boolean;
+                }
+
+                leaf bpdu_guard_do_disable {
+                    type boolean;
+                }
+
+                leaf path_cost {
+                    type uint32 {
+                        range "1..200000000" {
+                            error-message "%Error: STP interface path cost must be in range 1-200000000.";
+                            error-app-tag path-cost-invalid;
+                        }
+                    }
+                }
+
+                leaf priority {
+                    type uint8 {
+                        range "0..240" {
+                            error-message "%Error: STP interface priority must be in range 0-240.";
+                            error-app-tag priority-invalid;
+                        }
+                    }
+                }
+
+                leaf portfast {
+                    type boolean;
+                }
+
+                leaf uplink_fast {
+                    type boolean;
+                }
+            }
+        }
+    }
+}

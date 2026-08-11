@@ -1,0 +1,88 @@
+module sonic-mirror {
+    namespace "http://github.com/Azure/sonic-mirror";
+    prefix smir;
+    yang-version 1.1;
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import sonic-port {
+        prefix prt;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC MIRROR";
+
+    revision 2021-06-16 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-mirror {
+
+        container MIRROR_SESSION {
+
+            list MIRROR_SESSION_LIST {
+                key "name";
+                max-elements 8;
+                sonic-ext:custom-validation ValidateMirrorPort;
+                leaf name {
+                    type string;
+                }
+
+                leaf type {
+                    type string;
+                    default SPAN;
+                }
+
+                leaf direction {
+                    type string;
+                    default BOTH;
+                }
+
+                leaf src_port {
+                    type string;
+                }
+
+                leaf dst_port {
+                    type leafref {
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                    }
+                }
+
+            }
+        }
+
+        container MIRROR_SESSION_TABLE {
+            sonic-ext:db-name "STATE_DB";
+            sonic-ext:key-delim ":";
+
+            config false;
+
+            list MIRROR_SESSION_TABLE_LIST {
+                key "name";
+
+                leaf name {
+                    type leafref {
+                        path "../../../MIRROR_SESSION/MIRROR_SESSION_LIST/name";
+                    }
+                }
+
+                leaf cache {
+                    type string;
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,431 @@
+module sonic-nac {
+    namespace "http://github.com/Azure/sonic-nac";
+    prefix snac;
+    yang-version 1.1;
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    import sonic-port {
+        prefix prt;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONiC NAC yang model";
+
+    revision 2021-03-14 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-nac {
+
+        container DOT1X {
+
+            list DOT1X_LIST {
+
+                key "param";
+                leaf param {
+                    type string {
+                        pattern "GLOBAL";
+                    }
+                }
+
+                leaf admin_status {
+                    type enumeration {
+                        enum enable;
+                        enum disable;
+                    }
+                }
+
+                leaf reauthenticate {
+                    type enumeration {
+                        enum enable;
+                        enum disable;
+                    }
+                }
+
+                leaf session_time {
+                    type uint16 {
+                        range "60..3600" {
+                            error-message "Valid range is 60 to 3600.";
+                            error-app-tag dot1x-session-time-invalid;
+                        }
+                    }
+                }
+
+                leaf quiet_period {
+                    type uint16 {
+                        range "10..300" {
+                            error-message "Valid range is 10 to 300.";
+                            error-app-tag dot1x-quiet-timer-invalid;
+                        }
+                    }
+                }
+            }
+        }
+
+        container DOT1X_PORT {
+
+            list DOT1X_PORT_LIST {
+
+                key "ifname";
+                sonic-ext:custom-validation ValidateNacAuthMode;
+
+                leaf ifname {
+                    type union {
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                    }
+                }
+
+                leaf control_mode {
+                    type enumeration {
+                        enum force-authorized;
+                        enum force-unauthorized;
+                        enum auto;
+                    }
+                }
+
+                leaf auth_mode {
+                    type enumeration {
+                        enum single-host;
+                        enum multi-host;
+                        enum multi-domain;
+                    }
+                }
+
+                leaf max_auth_count {
+                    type uint16 {
+                        range "1..128" {
+                            error-message "Valid range is 1 to 128.";
+                            error-app-tag dot1x-max-auth-count-invalid;
+                        }
+                    }
+                }
+            }
+        }
+
+        container DOT1X_MAB_PORT {
+
+            list DOT1X_MAB_PORT_LIST {
+
+                key "ifname";
+                leaf ifname {
+                    type leafref {
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                    }
+                }
+
+                leaf admin_status {
+                    type enumeration {
+                        enum enable;
+                        enum disable;
+                    }
+                }
+            }
+        }
+
+        container DOT1X_MAB {
+
+            list DOT1X_MAB_LIST {
+
+                key "param";
+                leaf param {
+                    type string {
+                        pattern "GLOBAL";
+                    }
+                }
+
+                leaf reauthenticate {
+                    type enumeration {
+                        enum enable;
+                        enum disable;
+                    }
+                }
+
+                leaf session_time {
+                    type uint16 {
+                        range "60..3600" {
+                            error-message "Valid range is 60 to 3600.";
+                            error-app-tag dot1x-mab-session-time-invalid;
+                        }
+                    }
+                }
+
+                leaf quiet_period {
+                    type uint16 {
+                        range "10..300" {
+                            error-message "Valid range is 10 to 300.";
+                            error-app-tag dot1x-mab-quiet-timer-invalid;
+                        }
+                    }
+                }
+            }
+        }
+
+        container DOT1X_RADIUS {
+
+            list DOT1X_RADIUS_LIST {
+
+                key "param";
+                sonic-ext:custom-validation ValidateNacRadius;
+
+                leaf param {
+                    type string ;
+                }
+
+                leaf radius_server_ip {
+                    type inet:ipv4-address;
+                }
+
+                leaf radius_server_secret {
+                    type string {
+                        length "1..32";
+                    }
+                }
+
+                leaf radius_server_priority {
+                    type uint16 {
+                        range "1..10" {
+                            error-message "Valid range is 1 to 10.";
+                            error-app-tag radius-priority-invalid;
+                        }
+                    }
+                }
+
+                leaf radius_server_acct_port {
+                    type uint16 {
+                        range "1..65535" {
+                            error-message "Valid range is 1 to 65535.";
+                            error-app-tag radius-acctport-invalid;
+                        }
+                    }
+                }
+
+                leaf radius_server_auth_port {
+                    type uint16 {
+                        range "1..65535" {
+                            error-message "Valid range is 1 to 65535.";
+                            error-app-tag radius-authport-invalid;
+                        }
+                    }
+                }
+
+                leaf radius_retry {
+                    type uint16 {
+                        range "1..5" {
+                            error-message "Valid range is 1 to 5.";
+                            error-app-tag radius-retry-invalid;
+                        }
+                    }
+                }
+
+                leaf radius_timeout {
+                    type uint16 {
+                        range "1..10" {
+                            error-message "Valid range is 1 to 10.";
+                            error-app-tag radius-timeout-invalid;
+                        }
+                    }
+                }
+
+                leaf radius_source_ip {
+                    type inet:ipv4-address;
+                }
+
+                leaf radius_nas_ip {
+                    type inet:ipv4-address;
+                }
+
+                leaf radius_acct_start_stop {
+                    type enumeration {
+                        enum enable;
+                        enum disable;
+                    }
+                }
+
+            }
+        }
+
+        container DOT1X_MAB_RADIUS {
+
+            list DOT1X_MAB_RADIUS_LIST {
+
+                key "param";
+                leaf param {
+                    type string ;
+                }
+
+                leaf radius_server_ip {
+                    type inet:ipv4-address;
+                }
+
+                leaf radius_server_secret {
+                    type string {
+                        length "1..32";
+                    }
+                }
+
+                leaf radius_server_priority {
+                    type uint16 {
+                        range "1..10" {
+                            error-message "Valid range is 1 to 10.";
+                            error-app-tag radius-priority-invalid;
+                        }
+                    }
+                }
+
+                leaf radius_server_acct_port {
+                    type uint16 {
+                        range "1..65535" {
+                            error-message "Valid range is 1 to 65535.";
+                            error-app-tag radius-acctport-invalid;
+                        }
+                    }
+                }
+
+                leaf radius_server_auth_port {
+                    type uint16 {
+                        range "1..65535" {
+                            error-message "Valid range is 1 to 65535.";
+                            error-app-tag radius-authport-invalid;
+                        }
+                    }
+                }
+
+                leaf radius_retry {
+                    type uint16 {
+                        range "1..5" {
+                            error-message "Valid range is 1 to 5.";
+                            error-app-tag radius-retry-invalid;
+                        }
+                    }
+                }
+
+                leaf radius_timeout {
+                    type uint16 {
+                        range "1..10" {
+                            error-message "Valid range is 1 to 10.";
+                            error-app-tag radius-timeout-invalid;
+                        }
+                    }
+                }
+
+                leaf radius_source_ip {
+                    type inet:ipv4-address;
+                }
+
+                leaf radius_nas_ip {
+                    type inet:ipv4-address;
+                }
+
+                leaf radius_acct_start_stop {
+                    type enumeration {
+                        enum enable;
+                        enum disable;
+                    }
+                }
+
+            }
+        }
+
+        container NAC_RADIUS_DETECT_INTERVAL {
+
+            list NAC_RADIUS_DETECT_INTERVAL_LIST {
+
+                key "param";
+                leaf param {
+                    type string {
+                        pattern "GLOBAL";
+                    }
+                }
+
+                leaf value {
+                    type uint16 {
+                        range "0 | 30..300" {
+                            error-message "Valid range are 0 or 30 to 300.";
+                            error-app-tag radius-detect-interval-invalid;
+                        }
+                    }
+                }
+            }
+        }
+
+        container NAC_RADIUS_DETECT_TIMEOUT {
+
+            list NAC_RADIUS_DETECT_TIMEOUT_LIST {
+
+                key "param";
+                leaf param {
+                    type string {
+                        pattern "GLOBAL";
+                    }
+                }
+
+                leaf value {
+                    type uint16 {
+                        range "1..5" {
+                            error-message "Valid range is 1 to 5.";
+                            error-app-tag radius-detect-timeout-invalid;
+                        }
+                    }
+                }
+            }
+        }
+
+        container NAC_RADIUS_DETECT_RETRY {
+
+            list NAC_RADIUS_DETECT_RETRY_LIST {
+
+                key "param";
+                leaf param {
+                    type string {
+                        pattern "GLOBAL";
+                    }
+                }
+
+                leaf value {
+                    type uint16 {
+                        range "1..5" {
+                            error-message "Valid range is 1 to 5.";
+                            error-app-tag radius-detect-retry-invalid;
+                        }
+                    }
+                }
+            }
+        }
+
+        container COA {
+
+            list COA_LIST {
+
+                key "param";
+                leaf param {
+                    type string {
+                        pattern "GLOBAL";
+                    }
+                }
+
+                leaf coa_enable {
+                    type enumeration {
+                        enum enable;
+                        enum disable;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,79 @@
+module sonic-warm-restart {
+    namespace "http://github.com/Azure/sonic-warm-restart";
+    prefix wrm;
+    yang-version 1.1;
+
+    import sonic-common {
+        prefix cmn;
+    }
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    description "SONIC WARMRESTART.";
+
+    revision 2024-11-28 {
+        description "First Revision.";
+    }
+
+    typedef module-name {
+
+        type enumeration {
+            enum bgp {
+               description
+                 "BGP module.";
+            }
+
+            enum teamd {
+               description
+                 "Teamd module.";
+            }
+
+            enum swss {
+               description
+                 "Switch State Services module.";
+            }
+
+            enum system {
+               description
+                 "Warm Restart on a System level.";
+            }
+        } /* End of enumeration */
+
+        description
+            "The modules supported in warm-restart.";
+
+    } /* End of typedef module-name */
+
+
+    container sonic-warm-restart {
+
+        container WARM_RESTART_ENABLE_TABLE {
+            config false;
+            sonic-ext:db-name "STATE_DB";
+            sonic-ext:key-delim "|";
+
+            list WARM_RESTART_ENABLE_LIST {
+                key "module";
+
+                leaf module {
+                    type module-name;
+                    description
+                       "Name of the module.";
+                }
+
+                leaf enable {
+                    type cmn:enabled-status;
+                    description
+                       "Enabled when set to true.
+                        Disabled when set to false.";
+                }
+            } /* End of container WARM_RESTART_ENABLE_LIST */
+
+        } /* End of container WARM_RESTART_ENABLE_TABLE */
+
+    } /* End of container sonic-warm-restart */
+
+/* End of module sonic-warm-restart */
+}

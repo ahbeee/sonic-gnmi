@@ -1,0 +1,145 @@
+module sonic-device-metadata {
+	yang-version 1.1;
+	namespace "http://github.com/Azure/sonic-device-metadata";
+	prefix sdm;
+
+	import ietf-yang-types {
+		prefix yang;
+	}
+
+	import sonic-common {
+		prefix scommon;
+	}
+
+	organization
+		"SONiC";
+
+	contact
+		"SONiC";
+
+	description
+		"SONIC DEVICE METADATA";
+
+	revision 2019-07-02 {
+		description
+			"Initial revision.";
+	}
+
+	typedef timezone-name-type {
+		type string;
+		description
+			"A time zone name as used by the Time Zone Database,
+			sometimes referred to as the 'Olson Database'.
+
+			The exact set of valid values is an implementation-specific
+			matter.  Client discovery of the exact set of time zone names
+			for a particular server is out of scope.";
+		reference
+			"BCP 175: Procedures for Maintaining the Time Zone Database";
+	}
+
+	container sonic-device-metadata {
+
+		container DEVICE_METADATA {
+
+			list DEVICE_METADATA_LIST {
+				key "name";
+				max-elements 1;
+
+				leaf name{
+					type string;
+				}
+
+				leaf vrf_name {
+					type enumeration {
+						enum default;
+					}
+					default default;
+				}
+
+				leaf hwsku {
+					type string;
+				}
+
+				leaf hostname {
+					type string;
+				}
+
+				leaf platform {
+					type string;
+				}
+
+				leaf mac {
+					type yang:mac-address;
+				}
+
+				leaf bgp_asn {
+					type uint32 {
+						range "1..4294967295";
+					}
+				}
+
+				leaf default_pfcwd_status {
+					type enumeration {
+						enum enable;
+						enum disable;
+					}
+				}
+
+				leaf default_bgp_status {
+					type scommon:admin-status;
+				}
+
+				leaf docker_routing_config_mode {
+					type enumeration {
+						enum unified;
+						enum separated;
+						enum split;
+						enum split-unified;
+					}
+				}
+
+				leaf deployment_id {
+					type uint8 {
+						range "0..255";
+					}
+				}
+
+				leaf type {
+					type string {
+						length 1..255;
+						pattern "ToRRouter|LeafRouter|SpineChassisFrontendRouter|ChassisBackendRouter|ASIC|MgmtToRRouter|SpineRouter|BackEndToRRouter|BackEndLeafRouter|EPMS|MgmtTsToR|BmcMgmtToRRouter|not-provisioned";
+					}
+				}
+
+				leaf frr_mgmt_framework_config {
+					type boolean;
+				}
+
+				leaf suppress-fib-pending {
+					type enumeration {
+						enum enabled;
+						enum disabled;
+					}
+					default disabled;
+				}
+
+				leaf wait_provision_done {
+					type string {
+						pattern "enable|disable";
+					}
+				}
+
+				leaf timezone {
+					type timezone-name-type {
+						length 1..255;
+					}
+					default "UTC";
+					description "The TZ database name to use for the system, such as 'Europe/Stockholm'.";
+					reference "IANA Time Zone Database http://www.iana.org/time-zones";
+				}
+
+			}
+		}
+	}
+}

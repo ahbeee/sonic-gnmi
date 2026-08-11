@@ -1,0 +1,68 @@
+module sonic-tc-dscp-map {
+
+    yang-version 1.1;
+
+    namespace "http://github.com/sonic-net/sonic-tc-dscp-map";
+
+    prefix tcdscpm;
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "TC_TO_DSCP_MAP yang Module for SONiC OS";
+
+    revision 2024-03-06 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-tc-dscp-map {
+
+        container TC_TO_DSCP_MAP {
+
+            description "TC_TO_DSCP_MAP part of config_db.json";
+
+            list TC_TO_DSCP_MAP_LIST {
+
+                key "name";
+                sonic-ext:map-list "true"; //special annotation for map table
+                sonic-ext:map-leaf "tc dscp"; //every key:value pair is mapped to list keys, e.g. "1":"7" ==> tc=1, dscp=7
+                sonic-ext:custom-validation ValidateTctoDscp;
+                leaf name {
+                    type string;
+                }
+
+                list TC_TO_DSCP_MAP_INTERNAL_LIST { //this is list inside list for storing mapping between two fields
+
+                    key "tc dscp";
+
+                    leaf tc {
+                        type string {
+                            pattern "[0-7]?" {
+                                error-message "Invalid Traffic Class";
+                                error-app-tag tc-invalid;
+                            }
+                        }
+                    }
+
+                    leaf dscp {
+                        type string {
+                            pattern "6[0-3]|[1-5][0-9]?|[0-9]?" {
+                                error-message "Invalid DSCP";
+                                error-app-tag dscp-invalid;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

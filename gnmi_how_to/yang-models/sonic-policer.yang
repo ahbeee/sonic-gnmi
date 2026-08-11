@@ -1,0 +1,209 @@
+module sonic-policer {
+    namespace "http://github.com/Azure/sonic-policer";
+    prefix policer;
+    yang-version 1.1;
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC POLICER yang model";
+
+    revision 2019-05-15 {
+        description
+            "Initial revision.";
+    }
+
+    typedef packet_action {
+        type enumeration {
+            enum drop;
+            enum forward;
+            enum set_tc;
+            enum set_cos;
+            enum set_dscp;
+        }
+    }
+
+    container sonic-policer {
+
+        container POLICER {
+
+            list POLICER_LIST {
+                key "policername";
+                sonic-ext:custom-validation ValidatePolicerParam;
+                leaf policername {
+                    mandatory true;
+                    type string {
+                        pattern '[a-zA-Z0-9_-]{1,16}' {
+                            error-app-tag policername-invalid;
+                        }
+
+                        length 1..16 {
+                            error-message "Invalid length for the policer name.";
+                            error-app-tag policer-name-invalid-length;
+                        }
+                    }
+                }
+
+                leaf meter_type {
+                    type enumeration {
+                        enum packets;
+                        enum bytes;
+                    }
+                }
+
+                leaf mode {
+                    mandatory true;
+                    type enumeration {
+                        enum sr_tcm;
+                        enum tr_tcm;
+                        enum storm_control;
+                    }
+                }
+
+                leaf color_source {
+                    type enumeration {
+                        enum aware;
+                        enum blind;
+                    }
+                }
+
+                leaf red_packet_action {
+                    type packet_action;
+                }
+
+                leaf green_packet_action {
+                    type packet_action;
+                }
+
+                leaf yellow_packet_action {
+                    type packet_action;
+                }
+
+                leaf cir {
+                    type uint64 {
+                        range "1..100000000000" {
+                            error-message "Invalid committed information rate";
+                            error-app-tag cir-invalid;
+                        }
+                    }
+                }
+
+                leaf cbs {
+                    type uint64 {
+                        range "1..268369875" {
+                            error-message "Invalid committed burst size";
+                            error-app-tag cbs-invalid;
+                        }
+                    }
+                }
+
+                leaf pir {
+                    type uint64 {
+                        range "1..100000000000" {
+                            error-message "Invalid peak information rate";
+                            error-app-tag pir-invalid;
+                        }
+                    }
+                }
+
+                leaf pbs {
+                    type uint64 {
+                        range "1..268369875" {
+                            error-message "Invalid peak burst size";
+                            error-app-tag pbs-invalid;
+                        }
+                    }
+                }
+
+                leaf green_packet_new_tc {
+                    type uint8 {
+                        range "0..7" {
+                            error-message "Invalid Traffic Class";
+                            error-app-tag tc-invalid;
+                        }
+                    }
+                }
+
+                leaf green_packet_new_dscp {
+                    type uint8 {
+                        range "0..63" {
+                            error-message "Invalid DSCP";
+                            error-app-tag dscp-invalid;
+                        }
+                    }
+                }
+
+                leaf green_packet_new_cos {
+                    type uint8 {
+                        range "0..7" {
+                            error-message "Invalid Vlan Priority";
+                            error-app-tag cos-invalid;
+                        }
+                    }
+                }
+
+                leaf yellow_packet_new_tc {
+                    type uint8 {
+                        range "0..7" {
+                            error-message "Invalid Traffic Class";
+                            error-app-tag tc-invalid;
+                        }
+                    }
+                }
+
+                leaf yellow_packet_new_dscp {
+                    type uint8 {
+                        range "0..63" {
+                            error-message "Invalid DSCP";
+                            error-app-tag dscp-invalid;
+                        }
+                    }
+                }
+
+                leaf yellow_packet_new_cos {
+                    type uint8 {
+                        range "0..7" {
+                            error-message "Invalid Vlan Priority";
+                            error-app-tag cos-invalid;
+                        }
+                    }
+                }
+
+                leaf red_packet_new_tc {
+                    type uint8 {
+                        range "0..7" {
+                            error-message "Invalid Traffic Class";
+                            error-app-tag tc-invalid;
+                        }
+                    }
+                }
+
+                leaf red_packet_new_dscp {
+                    type uint8 {
+                        range "0..63" {
+                            error-message "Invalid DSCP";
+                            error-app-tag dscp-invalid;
+                        }
+                    }
+                }
+
+                leaf red_packet_new_cos {
+                    type uint8 {
+                        range "0..7" {
+                            error-message "Invalid Vlan Priority";
+                            error-app-tag cos-invalid;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

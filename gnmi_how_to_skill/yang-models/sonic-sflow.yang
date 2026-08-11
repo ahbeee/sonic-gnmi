@@ -1,0 +1,167 @@
+module sonic-sflow {
+    namespace "http://github.com/Azure/sonic-sflow";
+    prefix sflow;
+    yang-version 1.1;
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    import sonic-port {
+        prefix prt;
+    }
+
+    import sonic-portchannel {
+        prefix spc;
+    }
+
+    import sonic-vlan {
+        prefix svlan;
+    }
+
+    import sonic-loopback-interface {
+        prefix sonic-lo-if;
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC SFLOW";
+
+    revision 2021-11-08 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-sflow {
+
+        container SFLOW {
+
+            list SFLOW_LIST {
+                key "global";
+
+                leaf global {
+                    type string;
+                }
+
+                leaf admin_state {
+                    type string;
+                }
+
+                leaf agent_id {
+                    type union {
+                        type leafref {
+                            path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                        }
+                        type leafref {
+                            path "/spc:sonic-portchannel/spc:PORTCHANNEL/spc:PORTCHANNEL_LIST/spc:name";
+                        }
+                        type leafref {
+                            path "/svlan:sonic-vlan/svlan:VLAN/svlan:VLAN_LIST/svlan:name";
+                        }
+                        type leafref {
+                            path "/sonic-lo-if:sonic-loopback-interface/sonic-lo-if:LOOPBACK_INTERFACE/sonic-lo-if:LOOPBACK_INTERFACE_LIST/sonic-lo-if:loIfName";
+                        }
+                    }
+                }
+
+                leaf polling_interval {
+                    type uint32 {
+                        range "0|5..300" {
+                            error-message "Polling interval must be between 5-300 (0 to disable)";
+                            error-app-tag sample-rate-invalid;
+                        }
+                    }
+                }
+
+                leaf drop_monitor_limit {
+                    type uint16 {
+                        range "0..500" {
+                            error-message "Drop monitor limit must be between 1-500 (0 to disable)";
+                        }
+                    }
+                }
+
+                must "(global = 'global')" {
+                    error-message "Must be global.";
+                }
+            }
+        }
+
+        container SFLOW_SESSION {
+
+            list SFLOW_SESSION_LIST {
+                key "portname";
+
+                leaf portname{
+                    type leafref {
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                    }
+                }
+
+                leaf admin_state {
+                    type string;
+                }
+
+                leaf sample_rate {
+                    type uint32 {
+                        range "100..8388608" {
+                            error-message "Sample rate must be between 100 and 8388608";
+                            error-app-tag sample-rate-invalid;
+                        }
+                    }
+                }
+            }
+        }
+
+        container SFLOW_COLLECTOR {
+
+            list SFLOW_COLLECTOR_LIST {
+                key "collector_name";
+                max-elements 2 ;
+
+                leaf collector_name{
+                    type string {
+                        length "1..16" {
+                            error-message "Collector name must not exceed 16 characters";
+                            error-app-tag collector-name-invalid;
+                        }
+                    }
+                }
+
+                leaf collector_ip{
+                    type union {
+                        type inet:ipv4-address;
+                        type inet:ipv6-address;
+                    }
+                }
+
+                leaf collector_port{
+                    type uint32 {
+                        range "0..65535" {
+                            error-message "Collector port number must be between 0 and 65535";
+                            error-app-tag collector-port-invalid;
+                        }
+                    }
+                }
+
+                leaf collector_vrf {
+                    type string {
+                        pattern "mgmt|default" {
+                            error-message "Only 'default' and 'mgmt' VRF are supported";
+                            error-app-tag collector-vrf-name-invalid;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

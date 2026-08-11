@@ -1,0 +1,88 @@
+module sonic-poe {
+    namespace "http://github.com/Azure/sonic-poe";
+    prefix spc;
+
+    import sonic-port {
+        prefix prt;
+    }
+
+    import sonic-extension {
+        prefix sonic-ext;
+    }
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC POE";
+
+    revision 2025-06-16 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-poe {
+        container POE {
+            sonic-ext:db-name "APPL_DB";
+            sonic-ext:key-delim ":";
+            config false;
+
+            list POE_LIST {
+                key "portname";
+
+                leaf portname {
+                    type leafref {
+                        path "/prt:sonic-port/prt:PORT/prt:PORT_LIST/prt:ifname";
+                    }
+                }
+
+                leaf power-type {
+                    type string;
+                }
+
+                leaf source {
+                    type string;
+                }
+
+                leaf priority {
+                    type string;
+                }
+
+                leaf value {
+                    type string;
+                }
+
+                leaf allocated {
+                    type string;
+                }
+
+                leaf power-pairs {
+                    type string;
+                }
+
+                leaf supported {
+                    type string;
+                }
+
+                leaf enabled {
+                    type string;
+                }
+
+                leaf pair-control {
+                    type string;
+                }
+
+                leaf power-class {
+                    type string;
+                }
+
+                leaf dot3-type {
+                    type string;
+                }
+            }
+        }
+    }
+}

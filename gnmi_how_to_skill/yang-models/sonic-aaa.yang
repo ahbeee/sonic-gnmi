@@ -1,0 +1,64 @@
+module sonic-aaa {
+    namespace "http://github.com/Azure/sonic-aaa";
+    prefix saaa;
+    yang-version 1.1;
+
+    revision 2021-10-12 {
+        description "Add AAA authorization/accounting support.";
+    }
+
+    revision 2021-04-15 {
+        description "Initial revision.";
+    }
+
+    container sonic-aaa {
+        container AAA {
+            list AAA_LIST {
+                key "type";
+
+                leaf type {
+                    type enumeration {
+                        enum authentication;
+                        enum authorization;
+                        enum accounting;
+                    }
+                    description "AAA type authentication/authorization/accounting";
+                }
+
+                leaf login {
+                    type string;
+                    description "AAA authentication/authorization/accounting methods - radius/tacacs+/local/default";
+                }
+
+                leaf failthrough {
+                    type boolean;
+                    description "When set to true, authentication is attempted on next configured server/local in the list upon failure.";
+                }
+
+                leaf fallback {
+                    type boolean;
+                    description "Allow AAA fallback";
+                }
+
+                leaf debug {
+                    type boolean;
+                    description "Enable/disable AAA debugging";
+                }
+
+                leaf trace {
+                    type boolean;
+                    description "AAA packet trace";
+                }
+
+                leaf readonly_login_mode {
+                    type enumeration {
+                        enum iscli;
+                        enum shell;
+                    }
+                    description "Readonly user login landing mode. iscli enters isCLI directly. shell stays in Linux bash.";
+                    default shell;
+                }
+            }
+        }
+    }
+}
