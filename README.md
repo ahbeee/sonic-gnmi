@@ -5,6 +5,9 @@
 - Interface performance counters
 - Interface operational status
 - PortChannel operational status
+- MCLAG session、peer-link 與 member status
+- BGP neighbor status
+- OSPF neighbor status（SSH polling fallback）
 - 光模組插入／移除事件
 - Transceiver PM、VDM、LOS、CDR loss-of-lock 與 fault
 - Transceiver 告警變化次數及最後 set／clear 時間
@@ -67,6 +70,9 @@ python .\sonic_monitor.py transceiver-pm --help
 | `counters` | ✓ | ✓ | `SAMPLE` |
 | `interface-status` | ✓ | ✓ | `ON_CHANGE` |
 | `portchannel-status` | ✓ | ✓ | `ON_CHANGE` |
+| `mclag-status` | ✓ | ✓ | `ON_CHANGE` |
+| `bgp-status` | ✓ | ✓ | `ON_CHANGE` |
+| `ospf-status` | ✓ | ✓ | 不支援；使用 SSH polling |
 | `modules` | — | ✓ | `ON_CHANGE` |
 | `transceiver-pm` | ✓ | — | `SAMPLE` |
 | `transceiver-vdm` | ✓ | — | `SAMPLE` |
@@ -149,6 +155,109 @@ python .\sonic_monitor.py --host 202.39.116.32 `
 ```
 
 資料來源：`STATE_DB/LAG_TABLE/<PortChannel>` 的 `admin_status`、`oper_status` 與 `state`。
+
+## MCLAG status
+
+查詢所有 domains 的 session、peer-link 及 member local/remote 狀態：
+
+```powershell
+python .\sonic_monitor.py --host 202.39.116.32 `
+  mclag-status --domains all
+```
+
+每五秒 polling：
+
+```powershell
+python .\sonic_monitor.py --host 202.39.116.32 `
+  mclag-status --domains all --stream --interval 5
+```
+
+使用 gNMI `ON_CHANGE` 訂閱：
+
+```powershell
+python .\sonic_monitor.py --host 202.39.116.32 `
+  mclag-status --domains all --subscribe
+```
+
+診斷原始 notification：
+
+```powershell
+python .\sonic_monitor.py --host 202.39.116.32 `
+  mclag-status --domains all --subscribe --raw-events
+```
+
+輸出的 `scope` 代表：
+
+- `session`：MCLAG domain session
+- `peer_link`：peer-link PortChannel
+- `member_local`：本機 MCLAG member PortChannel
+- `member_remote`：對端回報的 MCLAG member PortChannel
+
+資料來源為 `STATE_DB/MCLAG_TABLE`、`MCLAG_REMOTE_INTF_TABLE` 與
+`LAG_TABLE/<PortChannel>`。收到任一 ON_CHANGE update 後，程式會重新比對完整
+MCLAG snapshot，因此一次有多個狀態變化時會分別輸出告警。
+
+## BGP neighbor status
+
+查詢所有 BGP neighbors：
+
+```powershell
+python .\sonic_monitor.py --host 202.39.116.32 `
+  bgp-status --peers all
+```
+
+每五秒 polling 指定 peers：
+
+```powershell
+python .\sonic_monitor.py --host 202.39.116.32 `
+  bgp-status --peers 10.29.32.29,10.31.32.31 `
+  --stream --interval 5
+```
+
+使用 gNMI `ON_CHANGE` 訂閱 neighbor up/down：
+
+```powershell
+python .\sonic_monitor.py --host 202.39.116.32 `
+  bgp-status --peers all --subscribe
+```
+
+資料來源：`STATE_DB/BGP_NEIGHBOR/<peer>` 的 `status` 與 `update_time`。
+SONiC 可能用 `status=down`、空 `{}` 或 Redis key deletion 表示 neighbor down；
+程式會將這些格式統一轉成每個 peer 各自一筆告警，並在 `source_event`
+標示原始事件類型。
+若要診斷設備實際送出的 notification，可加入 `--raw-events`；BGP 訂閱會同時
+監聽 table-level path 與啟動時已知的每個 neighbor exact path：
+
+```powershell
+python .\sonic_monitor.py --host 202.39.116.32 `
+  bgp-status --peers all --subscribe --raw-events
+```
+
+## OSPF neighbor status
+
+查詢一次：
+
+```powershell
+python .\sonic_monitor.py --host 202.39.116.32 `
+  ospf-status
+```
+
+每五秒讀取 FRR 狀態並只輸出 neighbor added、removed 或 state change：
+
+```powershell
+python .\sonic_monitor.py --host 202.39.116.32 `
+  ospf-status --stream --interval 5
+```
+
+這個 SONiC 202311.N 映像的 `STATE_DB` 沒有 OSPF table，OpenConfig
+`network-instance/protocols` 也沒有回傳 OSPF operational state，因此此 command
+透過唯讀 SSH 執行 `vtysh -c 'show ip ospf neighbor json'`，不是 gNMI Subscribe。
+如 SSH 不是 TCP 22，可在 command 前指定 `--ssh-port`：
+
+```powershell
+python .\sonic_monitor.py --host 202.39.116.32 --ssh-port 2222 `
+  ospf-status --stream --interval 5
+```
 
 ## 光模組插入／移除
 
@@ -266,6 +375,9 @@ SONiC 經由 gNMI 提供原始 DB update；`message`、`kind`、`severity`、`ol
 - Counters：`COUNTERS_DB/COUNTERS/<port>/<SAI counter>`
 - Interface state：`STATE_DB/PORT_TABLE/<port>`
 - PortChannel state：`STATE_DB/LAG_TABLE/<PortChannel>`
+- MCLAG：`STATE_DB/MCLAG_TABLE`、`MCLAG_REMOTE_INTF_TABLE`、`LAG_TABLE`
+- BGP state：`STATE_DB/BGP_NEIGHBOR/<peer>`
+- OSPF state：此映像未提供 gNMI path，使用 FRR SSH polling fallback
 - Transceiver：`STATE_DB/TRANSCEIVER_*`
 - 此映像不支援 wildcard Get，因此程式會先探索 interface／PortChannel，再查詢 exact paths
 - 目前兩台測試設備使用 plaintext port 8080；只有設備確實啟用 TLS 時才應加上 `--tls`
