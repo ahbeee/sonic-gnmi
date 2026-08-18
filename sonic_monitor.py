@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from typing import Any, Iterable
 
 from pygnmi.client import gNMIclient
+import paramiko
 
 
 DEFAULT_COUNTERS = (
@@ -303,6 +304,440 @@ def subscribe_portchannel_status(gc: gNMIclient, names: list[str], count: int) -
             log("status", "initial PortChannel status synchronized", oper_status=previous)
         if count and changes >= count:
             return
+
+
+def get_db_hash(gc: gNMIclient, target: str, path: str) -> dict[str, Any]:
+    try:
+        response = gc.get(path=[path], target=target, encoding="json_ietf")
+    except Exception:
+        return {}
+    for _, value, deleted in notifications(response):
+        if not deleted and isinstance(value, dict):
+            return value
+    return {}
+
+
+def mclag_inventory(
+    gc: gNMIclient, selected: str
+) -> tuple[dict[str, dict[str, Any]], dict[str, list[str]]]:
+    domains = get_db_hash(gc, "CONFIG_DB", "MCLAG_DOMAIN")
+    wanted = None if selected.lower() == "all" else {
+        item.strip() for item in selected.split(",") if item.strip()
+    }
+    if wanted is not None:
+        domains = {key: value for key, value in domains.items() if key in wanted}
+    if not domains:
+        raise RuntimeError("CONFIG_DB did not return any selected MCLAG domains")
+    members: dict[str, list[str]] = {str(domain): [] for domain in domains}
+    table = get_db_hash(gc, "CONFIG_DB", "MCLAG_INTERFACE")
+    for composite in table:
+        domain, separator, name = str(composite).partition("|")
+        if separator and domain in members:
+            members[domain].append(name)
+    for names in members.values():
+        names.sort()
+    return {str(key): value for key, value in domains.items()}, members
+
+
+def mclag_snapshot(
+    gc: gNMIclient,
+    domains: dict[str, dict[str, Any]],
+    members: dict[str, list[str]],
+) -> dict[str, dict[str, Any]]:
+    result: dict[str, dict[str, Any]] = {}
+    for domain, config in domains.items():
+        domain_state = get_db_hash(gc, "STATE_DB", f"MCLAG_TABLE/{domain}")
+        peer_link = str(domain_state.get("peer_link") or config.get("peer_link") or "")
+        result[f"domain:{domain}:session"] = {
+            "scope": "session",
+            "domain": domain,
+            "status": str(domain_state.get("oper_status", "down")).lower(),
+            "role": domain_state.get("role"),
+            "peer_link": peer_link,
+            "peer_ip": config.get("peer_ip"),
+        }
+        peer_state = get_db_hash(gc, "STATE_DB", f"LAG_TABLE/{peer_link}") if peer_link else {}
+        result[f"domain:{domain}:peer-link"] = {
+            "scope": "peer_link",
+            "domain": domain,
+            "name": peer_link,
+            "status": str(peer_state.get("oper_status", "down")).lower(),
+        }
+        for name in members.get(domain, []):
+            local = get_db_hash(gc, "STATE_DB", f"LAG_TABLE/{name}")
+            remote = get_db_hash(
+                gc, "STATE_DB", f"MCLAG_REMOTE_INTF_TABLE/{domain}/{name}"
+            )
+            result[f"member:{domain}:{name}:local"] = {
+                "scope": "member_local",
+                "domain": domain,
+                "member": name,
+                "status": str(local.get("oper_status", "down")).lower(),
+            }
+            result[f"member:{domain}:{name}:remote"] = {
+                "scope": "member_remote",
+                "domain": domain,
+                "member": name,
+                "status": str(remote.get("oper_status", "down")).lower(),
+            }
+    return result
+
+
+def show_mclag_status(
+    gc: gNMIclient,
+    domains: dict[str, dict[str, Any]],
+    members: dict[str, list[str]],
+) -> None:
+    for record in mclag_snapshot(gc, domains, members).values():
+        log("mclag_status", "MCLAG status", **record)
+
+
+def poll_mclag_status(
+    gc: gNMIclient,
+    domains: dict[str, dict[str, Any]],
+    members: dict[str, list[str]],
+    interval: float,
+    count: int,
+) -> None:
+    log("status", "MCLAG status polling started", interval_seconds=interval)
+    cycle = 0
+    while count == 0 or cycle < count:
+        show_mclag_status(gc, domains, members)
+        cycle += 1
+        if count == 0 or cycle < count:
+            time.sleep(interval)
+
+
+def subscribe_mclag_status(
+    gc: gNMIclient,
+    domains: dict[str, dict[str, Any]],
+    members: dict[str, list[str]],
+    count: int,
+    raw_events: bool,
+) -> None:
+    previous = mclag_snapshot(gc, domains, members)
+    lag_names = {
+        str(record.get("name"))
+        for record in previous.values()
+        if record.get("scope") == "peer_link" and record.get("name")
+    }
+    lag_names.update(name for names in members.values() for name in names)
+    paths = [
+        "MCLAG_TABLE",
+        "MCLAG_REMOTE_INTF_TABLE",
+        *(f"LAG_TABLE/{name}" for name in sorted(lag_names)),
+    ]
+    request = {
+        "mode": "stream",
+        "encoding": "json_ietf",
+        "updates_only": False,
+        "subscription": [{"path": path, "mode": "on_change"} for path in paths],
+    }
+    log("status", "gNMI ON_CHANGE MCLAG subscription started", paths=paths)
+    log("status", "initial MCLAG status synchronized", states=previous)
+    changes = 0
+    for response in gc.subscribe2(subscribe=request, target="STATE_DB"):
+        updates = list(notifications(response))
+        if raw_events:
+            for path, value, deleted in updates:
+                log(
+                    "gnmi_raw",
+                    "raw MCLAG subscription update",
+                    path=path,
+                    deleted=deleted,
+                    value=value,
+                )
+        if not updates:
+            continue
+        current = mclag_snapshot(gc, domains, members)
+        for key, record in current.items():
+            old_status = previous.get(key, {}).get("status")
+            new_status = record.get("status")
+            if old_status == new_status:
+                continue
+            log(
+                "mclag_status",
+                "MCLAG status changed",
+                severity="info" if new_status == "up" else "warning",
+                old_status=old_status,
+                new_status=new_status,
+                **{field: value for field, value in record.items() if field != "status"},
+            )
+            changes += 1
+        previous = current
+        if count and changes >= count:
+            return
+
+
+def bgp_neighbors(gc: gNMIclient) -> dict[str, dict[str, Any]]:
+    response = gc.get(path=["BGP_NEIGHBOR"], target="STATE_DB", encoding="json_ietf")
+    result: dict[str, dict[str, Any]] = {}
+    for _, value, deleted in notifications(response):
+        if deleted or not isinstance(value, dict):
+            continue
+        for peer, fields in value.items():
+            if isinstance(fields, dict):
+                result[str(peer)] = fields
+    return result
+
+
+def show_bgp_status(gc: gNMIclient, peers: set[str] | None = None) -> None:
+    found = bgp_neighbors(gc)
+    for peer, fields in sorted(found.items()):
+        if peers is not None and peer not in peers:
+            continue
+        log(
+            "bgp_status",
+            "BGP neighbor status",
+            peer=peer,
+            status=fields.get("status"),
+            update_time=fields.get("update_time"),
+        )
+
+
+def poll_bgp_status(
+    gc: gNMIclient, peers: set[str] | None, interval: float, count: int
+) -> None:
+    log("status", "BGP status polling started", interval_seconds=interval)
+    cycle = 0
+    while count == 0 or cycle < count:
+        show_bgp_status(gc, peers)
+        cycle += 1
+        if count == 0 or cycle < count:
+            time.sleep(interval)
+
+
+def bgp_status_updates(
+    path: str, value: Any, deleted: bool, known_peers: Iterable[str] = ()
+) -> Iterable[tuple[str, str, dict[str, Any], str]]:
+    """Normalize SONiC BGP updates, including empty hashes and key deletion."""
+    clean_path = path.strip("/")
+    prefix = "BGP_NEIGHBOR/"
+    if clean_path.startswith(prefix):
+        peer = clean_path.removeprefix(prefix)
+        fields = value if isinstance(value, dict) else {}
+        raw_status = fields.get("status")
+        status = (
+            str(raw_status).strip().lower()
+            if raw_status is not None and not deleted
+            else "down"
+        )
+        reason = "delete" if deleted else "empty" if not fields else "update"
+        yield peer, status, fields, reason
+        return
+    if clean_path != "BGP_NEIGHBOR":
+        return
+    if deleted or not isinstance(value, dict):
+        for peer in known_peers:
+            yield peer, "down", {}, "table-delete"
+        return
+    if not value:
+        for peer in known_peers:
+            yield peer, "down", {}, "empty-table"
+        return
+    for peer, raw_fields in value.items():
+        fields = raw_fields if isinstance(raw_fields, dict) else {}
+        raw_status = fields.get("status")
+        status = (
+            str(raw_status).strip().lower()
+            if raw_status is not None
+            else "down"
+        )
+        reason = "update" if raw_status is not None else "empty"
+        yield str(peer), status, fields, reason
+
+
+def subscribe_bgp_status(
+    gc: gNMIclient, peers: set[str] | None, count: int, raw_events: bool
+) -> None:
+    snapshot = bgp_neighbors(gc)
+    subscribed_peers = sorted(peers if peers is not None else snapshot)
+    request = {
+        "mode": "stream",
+        "encoding": "json_ietf",
+        "updates_only": False,
+        # Keep the table subscription for key creation/deletion and add exact
+        # key subscriptions because some SONiC images coalesce simultaneous
+        # table updates and otherwise expose only one changed neighbor.
+        "subscription": [
+            {"path": "BGP_NEIGHBOR", "mode": "on_change"},
+            *(
+                {
+                    "path": f"BGP_NEIGHBOR/{peer}",
+                    "mode": "on_change",
+                }
+                for peer in subscribed_peers
+            ),
+        ],
+    }
+    previous = {
+        peer: str(fields.get("status", "down")).strip().lower()
+        for peer, fields in snapshot.items()
+        if peers is None or peer in peers
+    }
+    changes = 0
+    log(
+        "status",
+        "gNMI ON_CHANGE BGP subscription started",
+        paths=[item["path"] for item in request["subscription"]],
+    )
+    log("status", "initial BGP status synchronized", neighbors=previous)
+    for response in gc.subscribe2(subscribe=request, target="STATE_DB"):
+        for path, value, deleted in notifications(response):
+            if raw_events:
+                log(
+                    "gnmi_raw",
+                    "raw BGP subscription update",
+                    path=path,
+                    deleted=deleted,
+                    value=value,
+                )
+            for peer, new_status, fields, reason in bgp_status_updates(
+                path, value, deleted, previous
+            ):
+                if peers is not None and peer not in peers:
+                    continue
+                old_status = previous.get(peer)
+                previous[peer] = new_status
+                if old_status != new_status and (
+                    old_status is not None or new_status == "down"
+                ):
+                    log(
+                        "bgp_status",
+                        "BGP neighbor status changed",
+                        severity="info" if new_status == "up" else "warning",
+                        peer=peer,
+                        old_status=old_status,
+                        new_status=new_status,
+                        update_time=fields.get("update_time"),
+                        source_event=reason,
+                    )
+                    changes += 1
+        if count and changes >= count:
+            return
+
+
+def parse_peer_filter(value: str) -> set[str] | None:
+    if value.lower() == "all":
+        return None
+    peers = {item.strip() for item in value.split(",") if item.strip()}
+    if not peers:
+        raise ValueError("at least one BGP peer is required")
+    return peers
+
+
+def read_ospf_neighbors(
+    host: str, ssh_port: int, username: str, password: str
+) -> dict[str, dict[str, Any]]:
+    client = paramiko.SSHClient()
+    client.load_system_host_keys()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    try:
+        client.connect(
+            host,
+            port=ssh_port,
+            username=username,
+            password=password,
+            timeout=15,
+            look_for_keys=False,
+            allow_agent=False,
+        )
+        _, stdout, stderr = client.exec_command("vtysh -c 'show ip ospf neighbor json'")
+        output = stdout.read().decode("utf-8", errors="replace")
+        error = stderr.read().decode("utf-8", errors="replace").strip()
+        if error and not output.strip():
+            raise RuntimeError(error)
+        payload = json.loads(output or "{}")
+    finally:
+        client.close()
+    result: dict[str, dict[str, Any]] = {}
+    neighbors = payload.get("neighbors", {}) if isinstance(payload, dict) else {}
+    for router_id, entries in neighbors.items() if isinstance(neighbors, dict) else []:
+        for entry in entries if isinstance(entries, list) else []:
+            if not isinstance(entry, dict):
+                continue
+            key = f"{router_id}|{entry.get('address', '')}|{entry.get('ifaceName', '')}"
+            result[key] = {"router_id": router_id, **entry}
+    return result
+
+
+def show_ospf_status(
+    host: str, ssh_port: int, username: str, password: str
+) -> None:
+    neighbors = read_ospf_neighbors(host, ssh_port, username, password)
+    for fields in neighbors.values():
+        log(
+            "ospf_status",
+            "OSPF neighbor status",
+            router_id=fields.get("router_id"),
+            address=fields.get("address"),
+            interface=fields.get("ifaceName"),
+            state=fields.get("nbrState", fields.get("state")),
+            converged=fields.get("converged"),
+            dead_time=fields.get("deadTime"),
+        )
+
+
+def monitor_ospf_status(
+    host: str,
+    ssh_port: int,
+    username: str,
+    password: str,
+    interval: float,
+    count: int,
+) -> None:
+    previous = read_ospf_neighbors(host, ssh_port, username, password)
+    log(
+        "status",
+        "OSPF SSH polling started; this image has no OSPF gNMI state path",
+        interval_seconds=interval,
+        neighbors=[fields.get("router_id") for fields in previous.values()],
+    )
+    cycle = 0
+    while count == 0 or cycle < count:
+        if cycle:
+            time.sleep(interval)
+        current = read_ospf_neighbors(host, ssh_port, username, password)
+        for key in sorted(previous.keys() - current.keys()):
+            fields = previous[key]
+            log(
+                "ospf_status",
+                "OSPF neighbor removed",
+                severity="warning",
+                router_id=fields.get("router_id"),
+                address=fields.get("address"),
+                interface=fields.get("ifaceName"),
+                old_state=fields.get("nbrState", fields.get("state")),
+                new_state="down",
+            )
+        for key in sorted(current.keys() - previous.keys()):
+            fields = current[key]
+            log(
+                "ospf_status",
+                "OSPF neighbor added",
+                severity="info" if fields.get("converged") == "Full" else "warning",
+                router_id=fields.get("router_id"),
+                address=fields.get("address"),
+                interface=fields.get("ifaceName"),
+                new_state=fields.get("nbrState", fields.get("state")),
+            )
+        for key in sorted(previous.keys() & current.keys()):
+            old = previous[key].get("nbrState", previous[key].get("state"))
+            new = current[key].get("nbrState", current[key].get("state"))
+            if old != new:
+                fields = current[key]
+                log(
+                    "ospf_status",
+                    "OSPF neighbor status changed",
+                    severity="info" if fields.get("converged") == "Full" else "warning",
+                    router_id=fields.get("router_id"),
+                    address=fields.get("address"),
+                    interface=fields.get("ifaceName"),
+                    old_state=old,
+                    new_state=new,
+                )
+        previous = current
+        cycle += 1
 
 
 def module_inventory(gc: gNMIclient) -> dict[str, dict[str, Any]]:
@@ -603,6 +1038,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--port", type=int, default=int(os.getenv("SONIC_GNMI_PORT", "8080")))
     parser.add_argument("--username", default=os.getenv("SONIC_USERNAME", "admin"))
     parser.add_argument("--password", default=os.getenv("SONIC_PASSWORD"))
+    parser.add_argument("--ssh-port", type=int, default=22, help="SSH port used by ospf-status")
     parser.add_argument(
         "--tls", action="store_true", help="use TLS (default is plaintext/insecure gRPC)"
     )
@@ -646,6 +1082,45 @@ def build_parser() -> argparse.ArgumentParser:
     portchannel_status.add_argument(
         "--count", type=int, default=0, help="poll cycles or subscribed changes; 0 means forever"
     )
+
+    mclag_status = subparsers.add_parser(
+        "mclag-status", help="read or monitor MCLAG session, peer-link and members"
+    )
+    mclag_status.add_argument("--domains", default="all", help="comma list, or 'all'")
+    mclag_status.add_argument("--stream", action="store_true", help="poll repeatedly")
+    mclag_status.add_argument(
+        "--subscribe", action="store_true", help="use gNMI ON_CHANGE Subscribe"
+    )
+    mclag_status.add_argument(
+        "--raw-events", action="store_true", help="also print raw gNMI MCLAG updates"
+    )
+    mclag_status.add_argument("--interval", type=float, default=5.0)
+    mclag_status.add_argument(
+        "--count", type=int, default=0, help="poll cycles or subscribed changes; 0 means forever"
+    )
+
+    bgp_status = subparsers.add_parser(
+        "bgp-status", help="read or monitor BGP neighbor up/down state"
+    )
+    bgp_status.add_argument("--peers", default="all", help="comma list, or 'all'")
+    bgp_status.add_argument("--stream", action="store_true", help="poll repeatedly")
+    bgp_status.add_argument(
+        "--subscribe", action="store_true", help="use gNMI ON_CHANGE Subscribe"
+    )
+    bgp_status.add_argument(
+        "--raw-events", action="store_true", help="also print raw gNMI BGP updates"
+    )
+    bgp_status.add_argument("--interval", type=float, default=5.0)
+    bgp_status.add_argument(
+        "--count", type=int, default=0, help="poll cycles or subscribed changes; 0 means forever"
+    )
+
+    ospf_status = subparsers.add_parser(
+        "ospf-status", help="read or SSH-poll FRR OSPF neighbor state"
+    )
+    ospf_status.add_argument("--stream", action="store_true", help="poll and report changes")
+    ospf_status.add_argument("--interval", type=float, default=5.0)
+    ospf_status.add_argument("--count", type=int, default=0, help="poll cycles; 0 means forever")
 
     modules = subparsers.add_parser("modules", help="alarm on transceiver insert/remove")
     modules.add_argument("--ports", default="all", help="comma list, or 'all'")
@@ -714,6 +1189,19 @@ def main() -> int:
     args = build_parser().parse_args()
     password = args.password or getpass.getpass(f"Password for {args.username}@{args.host}: ")
     try:
+        if args.command == "ospf-status":
+            if args.stream:
+                monitor_ospf_status(
+                    args.host,
+                    args.ssh_port,
+                    args.username,
+                    password,
+                    args.interval,
+                    args.count,
+                )
+            else:
+                show_ospf_status(args.host, args.ssh_port, args.username, password)
+            return 0
         with gNMIclient(
             target=(args.host, args.port),
             username=args.username,
@@ -730,6 +1218,28 @@ def main() -> int:
                     poll_portchannel_status(gc, names, args.interval, args.count)
                 else:
                     show_portchannel_status(gc, names)
+                return 0
+            if args.command == "mclag-status":
+                domains, members = mclag_inventory(gc, args.domains)
+                if args.subscribe:
+                    subscribe_mclag_status(
+                        gc, domains, members, args.count, args.raw_events
+                    )
+                elif args.stream:
+                    poll_mclag_status(
+                        gc, domains, members, args.interval, args.count
+                    )
+                else:
+                    show_mclag_status(gc, domains, members)
+                return 0
+            if args.command == "bgp-status":
+                peers = parse_peer_filter(args.peers)
+                if args.subscribe:
+                    subscribe_bgp_status(gc, peers, args.count, args.raw_events)
+                elif args.stream:
+                    poll_bgp_status(gc, peers, args.interval, args.count)
+                else:
+                    show_bgp_status(gc, peers)
                 return 0
             ports = selected_ports(gc, args.ports)
             if args.command == "counters":
