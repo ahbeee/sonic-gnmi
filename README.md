@@ -70,6 +70,7 @@ python .\sonic_monitor.py transceiver-pm --help
 | `counters` | ✓ | ✓ | `SAMPLE` |
 | `interface-status` | ✓ | ✓ | `ON_CHANGE` |
 | `portchannel-status` | ✓ | ✓ | `ON_CHANGE` |
+| `portchannel-members` | ✓ | — | — |
 | `mclag-status` | ✓ | ✓ | `ON_CHANGE` |
 | `bgp-status` | ✓ | ✓ | `ON_CHANGE` |
 | `ospf-status` | ✓ | ✓ | 不支援；使用 SSH polling |
@@ -155,6 +156,15 @@ python .\sonic_monitor.py --host 202.39.116.32 `
 ```
 
 資料來源：`STATE_DB/LAG_TABLE/<PortChannel>` 的 `admin_status`、`oper_status` 與 `state`。
+
+列出設備上所有 PortChannel/member 關係：
+
+```powershell
+python .\sonic_monitor.py --host 202.39.116.32 `
+  portchannel-members
+```
+
+資料來源：`CONFIG_DB/PORTCHANNEL_MEMBER`。
 
 ## MCLAG status
 
