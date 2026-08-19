@@ -317,6 +317,32 @@ def get_db_hash(gc: gNMIclient, target: str, path: str) -> dict[str, Any]:
     return {}
 
 
+def show_portchannel_members(gc: gNMIclient) -> None:
+    table = get_db_hash(gc, "CONFIG_DB", "PORTCHANNEL_MEMBER")
+    relationships: list[tuple[str, str]] = []
+    for composite in table:
+        portchannel, separator, member = str(composite).partition("|")
+        if separator and portchannel and member:
+            relationships.append((portchannel, member))
+
+    def name_key(name: str, prefix: str) -> tuple[int, int | str]:
+        suffix = name.removeprefix(prefix)
+        return (0, int(suffix)) if suffix.isdigit() else (1, name)
+
+    relationships.sort(
+        key=lambda item: (name_key(item[0], "PortChannel"), name_key(item[1], "Ethernet"))
+    )
+    for portchannel, member in relationships:
+        log(
+            "portchannel_member",
+            "PortChannel member relationship",
+            portchannel=portchannel,
+            member=member,
+        )
+    if not relationships:
+        log("warning", "no PortChannel members returned")
+
+
 def mclag_inventory(
     gc: gNMIclient, selected: str
 ) -> tuple[dict[str, dict[str, Any]], dict[str, list[str]]]:
@@ -1083,6 +1109,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--count", type=int, default=0, help="poll cycles or subscribed changes; 0 means forever"
     )
 
+    subparsers.add_parser(
+        "portchannel-members", help="list all configured PortChannel member relationships"
+    )
+
     mclag_status = subparsers.add_parser(
         "mclag-status", help="read or monitor MCLAG session, peer-link and members"
     )
@@ -1218,6 +1248,9 @@ def main() -> int:
                     poll_portchannel_status(gc, names, args.interval, args.count)
                 else:
                     show_portchannel_status(gc, names)
+                return 0
+            if args.command == "portchannel-members":
+                show_portchannel_members(gc)
                 return 0
             if args.command == "mclag-status":
                 domains, members = mclag_inventory(gc, args.domains)
