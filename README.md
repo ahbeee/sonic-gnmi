@@ -9,6 +9,7 @@
 - BGP neighbor status
 - OSPF neighbor status（SSH polling fallback）
 - 光模組插入／移除事件
+- 光模組 EEPROM 識別資訊與能力
 - Transceiver PM、VDM、LOS、CDR loss-of-lock 與 fault
 - Transceiver 告警變化次數及最後 set／clear 時間
 
@@ -75,6 +76,7 @@ python .\sonic_monitor.py transceiver-pm --help
 | `bgp-status` | ✓ | ✓ | `ON_CHANGE` |
 | `ospf-status` | ✓ | ✓ | 不支援；使用 SSH polling |
 | `modules` | — | ✓ | `ON_CHANGE` |
+| `transceiver-eeprom` | ✓ | — | — |
 | `transceiver-pm` | ✓ | — | `SAMPLE` |
 | `transceiver-vdm` | ✓ | — | `SAMPLE` |
 | `transceiver-status` | ✓ | — | `ON_CHANGE` |
@@ -268,6 +270,30 @@ python .\sonic_monitor.py --host 202.39.116.32 `
 python .\sonic_monitor.py --host 202.39.116.32 --ssh-port 2222 `
   ospf-status --stream --interval 5
 ```
+
+## 光模組 EEPROM
+
+單次查詢 Ethernet16（密碼沿用環境變數或互動輸入）：
+
+```powershell
+python .\sonic_monitor.py --host 202.39.116.31 transceiver-eeprom --ports Ethernet16
+```
+
+查詢多個或全部 Ethernet ports：
+
+```powershell
+python .\sonic_monitor.py transceiver-eeprom --ports Ethernet16,Ethernet24
+python .\sonic_monitor.py transceiver-eeprom --ports all
+```
+
+資料來源為 gNMI `STATE_DB/TRANSCEIVER_INFO/<port>`，不是 REST API，
+也不是直接讀取原始 EEPROM bytes。每個 port 輸出一筆
+`kind=transceiver_eeprom` 的 JSON，`value` 保留設備回傳的完整欄位與型別。
+可包含廠商、料號、序號、日期、CMIS 版本、DOM capability、各 lane 的
+active application、application advertisement，以及支援的頻率與功率範圍。
+`application_advertisement` 與 `dom_capability` 可能是字串，程式保留原值。
+欄位依模組及映像而異；本次設備實測未提供 Active／Inactive Firmware。
+沒有資料時輸出 warning；單一 port 查詢失敗會輸出 error 並繼續查詢其餘 ports。
 
 ## 光模組插入／移除
 

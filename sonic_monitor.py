@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import getpass
 import json
+import logging
 import os
 import re
 import sys
@@ -798,6 +799,27 @@ def transceiver_details(gc: gNMIclient, port: str) -> dict[str, Any]:
     return {}
 
 
+def show_transceiver_eeprom(gc: gNMIclient, ports: list[str]) -> None:
+    """Read decoded EEPROM fields cached in STATE_DB without changing their values."""
+    # pygnmi binds a logging handler to stdout at import time.
+    for handler in logging.getLogger("pygnmi.client").handlers:
+        if isinstance(handler, logging.StreamHandler) and handler.stream is sys.stdout:
+            handler.setStream(sys.stderr)
+    for port in ports:
+        path = f"TRANSCEIVER_INFO/{port}"
+        try:
+            value = transceiver_details(gc, port)
+        except Exception as exc:
+            log("error", "transceiver EEPROM is unavailable", port=port,
+                path=path, exception=str(exc))
+            continue
+        if not value:
+            log("warning", "no EEPROM data returned", port=port, path=path)
+            continue
+        log("transceiver_eeprom", "transceiver EEPROM data", port=port,
+            table="TRANSCEIVER_INFO", path=path, value=value)
+
+
 def show_transceiver_data(
     gc: gNMIclient, ports: list[str], primary_table: str, table_only: bool = False
 ) -> None:
@@ -1158,6 +1180,13 @@ def build_parser() -> argparse.ArgumentParser:
     modules.add_argument("--count", type=int, default=0, help="poll cycles; 0 means forever")
     modules.add_argument("--subscribe", action="store_true", help="use gNMI ON_CHANGE Subscribe")
 
+    transceiver_eeprom = subparsers.add_parser(
+        "transceiver-eeprom", help="read decoded transceiver EEPROM information"
+    )
+    transceiver_eeprom.add_argument(
+        "--ports", default="Ethernet16", help="comma list, or 'all'"
+    )
+
     transceiver_pm = subparsers.add_parser(
         "transceiver-pm", help="read transceiver performance-monitoring values"
     )
@@ -1295,6 +1324,8 @@ def main() -> int:
                     subscribe_modules(gc, ports, args.count)
                 else:
                     monitor_modules(gc, ports, args.interval, args.count)
+            elif args.command == "transceiver-eeprom":
+                show_transceiver_eeprom(gc, ports)
             elif args.command == "transceiver-pm":
                 if args.subscribe:
                     subscribe_transceiver_data(
