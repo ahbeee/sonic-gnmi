@@ -116,23 +116,35 @@ python .\sonic_monitor.py --host 202.39.116.32 `
   --counter SAI_PORT_STAT_IF_OUT_OCTETS
 ```
 
-## Interface status
+## Interface admin/oper status
 
-每五秒 polling operation up/down：
+查詢一次 admin 與 operation status：
 
 ```powershell
-python .\sonic_monitor.py --host 202.39.116.32 `
+python .\sonic_monitor.py --host 202.39.116.31 `
+  interface-status --ports Ethernet40
+```
+
+每五秒 polling admin/operation up/down：
+
+```powershell
+python .\sonic_monitor.py --host 202.39.116.31 `
   interface-status --ports all --stream --interval 5
 ```
 
-訂閱 operation status 變化：
+訂閱 admin 或 operation status 變化：
 
 ```powershell
-python .\sonic_monitor.py --host 202.39.116.32 `
+python .\sonic_monitor.py --host 202.39.116.31 `
   interface-status --ports all --subscribe
 ```
 
-資料來源：`STATE_DB/PORT_TABLE/<port>/netdev_oper_status`。
+資料來源：
+
+```text
+STATE_DB/PORT_TABLE/<port>/admin_status
+STATE_DB/PORT_TABLE/<port>/netdev_oper_status
+```
 
 ## PortChannel status
 

@@ -164,23 +164,35 @@ def subscribe_counters(
                 return
 
 
-def interface_oper_status(fields: Any) -> str | None:
-    """Return the operational state exposed by this image's PORT_TABLE."""
+def interface_status_values(fields: Any) -> dict[str, str]:
+    """Return administrative and operational states from PORT_TABLE."""
     if not isinstance(fields, dict):
-        return None
-    value = fields.get("netdev_oper_status", fields.get("oper_status"))
-    return str(value).strip().lower() if value is not None else None
+        return {}
+    result: dict[str, str] = {}
+    admin = fields.get("admin_status")
+    oper = fields.get("netdev_oper_status", fields.get("oper_status"))
+    if admin is not None:
+        result["admin_status"] = str(admin).strip().lower()
+    if oper is not None:
+        result["oper_status"] = str(oper).strip().lower()
+    return result
 
 
 def show_interface_status(gc: gNMIclient, ports: list[str]) -> None:
     for port in ports:
         path = f"PORT_TABLE/{port}"
         response = gc.get(path=[path], target="STATE_DB", encoding="json_ietf")
-        status = None
+        status: dict[str, str] = {}
         for _, value, deleted in notifications(response):
             if not deleted:
-                status = interface_oper_status(value)
-        log("interface_status", "interface operational status", port=port, oper_status=status)
+                status.update(interface_status_values(value))
+        log(
+            "interface_status",
+            "interface status",
+            port=port,
+            admin_status=status.get("admin_status"),
+            oper_status=status.get("oper_status"),
+        )
 
 
 def poll_interface_status(
@@ -200,37 +212,54 @@ def subscribe_interface_status(gc: gNMIclient, ports: list[str], count: int) -> 
         "mode": "stream",
         "encoding": "json_ietf",
         "updates_only": False,
-        "subscription": [{"path": "PORT_TABLE", "mode": "on_change"}],
+        "subscription": [
+            {"path": "PORT_TABLE", "mode": "on_change"},
+            *(
+                {"path": f"PORT_TABLE/{port}", "mode": "on_change"}
+                for port in ports
+            ),
+        ],
     }
-    previous: dict[str, str] = {}
+    previous: dict[str, dict[str, str]] = {}
     synchronized = False
     changes = 0
     log("status", "gNMI ON_CHANGE interface status subscription started", ports=ports)
     for response in gc.subscribe2(subscribe=request, target="STATE_DB"):
         for path, value, deleted in notifications(response):
-            if deleted or path.strip("/") != "PORT_TABLE" or not isinstance(value, dict):
+            if deleted or not isinstance(value, dict):
                 continue
-            for port, fields in value.items():
+            clean_path = path.strip("/")
+            if clean_path == "PORT_TABLE":
+                updates = value.items()
+            elif clean_path.startswith("PORT_TABLE/"):
+                updates = [(clean_path.removeprefix("PORT_TABLE/"), value)]
+            else:
+                continue
+            for port, fields in updates:
                 if port not in ports:
                     continue
-                new_status = interface_oper_status(fields)
-                if new_status is None:
+                statuses = interface_status_values(fields)
+                if not statuses:
                     continue
-                old_status = previous.get(port)
-                previous[port] = new_status
-                if synchronized and old_status is not None and old_status != new_status:
-                    log(
-                        "interface_status",
-                        "interface operational status changed",
-                        severity="info" if new_status == "up" else "warning",
-                        port=port,
-                        old_status=old_status,
-                        new_status=new_status,
-                    )
-                    changes += 1
+                old_statuses = previous.get(port, {})
+                for field, new_status in statuses.items():
+                    old_status = old_statuses.get(field)
+                    if synchronized and old_status is not None and old_status != new_status:
+                        label = "administrative" if field == "admin_status" else "operational"
+                        log(
+                            "interface_status",
+                            f"interface {label} status changed",
+                            severity="info" if new_status == "up" else "warning",
+                            port=port,
+                            field=field,
+                            old_status=old_status,
+                            new_status=new_status,
+                        )
+                        changes += 1
+                previous[port] = {**old_statuses, **statuses}
         if response.get("sync_response") and not synchronized:
             synchronized = True
-            log("status", "initial interface status synchronized", oper_status=previous)
+            log("status", "initial interface status synchronized", interfaces=previous)
         if count and changes >= count:
             return
 
